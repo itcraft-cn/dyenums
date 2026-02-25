@@ -4,16 +4,18 @@ This file provides guidance to CodeBuddy Code when working with code in this rep
 
 ## Project Overview
 
-**dyenums** is a dynamic enum library for Java 8 that provides an alternative to Java's static enums. The library uses a Map+Factory pattern to enable runtime registration, dynamic loading from configuration files or databases, and extensibility that traditional Java enums cannot provide.
+**dyenums** is a dynamic enum library for Java 8 that provides an alternative to Java's static enums. The library uses a
+Map+Factory pattern to enable runtime registration, dynamic loading from configuration files or databases, and
+extensibility that traditional Java enums cannot provide.
 
 ## Technology Stack
 
 - **Java**: Java 8 (must be compatible with Java 8 features)
 - **Build Tool**: Maven
-- **Key Dependencies**: 
-  - Spring Framework (for integration features)
-  - SLF4J (for logging)
-  - JUnit (for testing)
+- **Key Dependencies**:
+    - Spring Framework (for integration features)
+    - SLF4J (for logging)
+    - JUnit (for testing)
 
 ## Build Commands
 
@@ -57,8 +59,8 @@ dyenums/
 │   │               └── dyenums/
 │   │                   ├── annotation/          # Custom annotations (@EnumDefinition, etc.)
 │   │                   ├── core/                # Core interfaces and base classes
-│   │                   │   ├── CodeEnum.java    # Main interface
-│   │                   │   ├── BaseCodeEnum.java
+│   │                   │   ├── DyEnum.java    # Main interface
+│   │                   │   ├── BaseDyEnum.java
 │   │                   │   └── EnumRegistry.java
 │   │                   ├── config/              # Configuration loading
 │   │                   │   ├── FileBasedEnumConfig.java
@@ -87,37 +89,38 @@ dyenums/
 
 ### Key Components
 
-1. **CodeEnum Interface** (core/CodeEnum.java)
-   - Defines the contract for all dynamic enums
-   - Methods: `getCode()`, `getName()`, `getDescription()`, `getOrder()`
+1. **DyEnum Interface** (core/DyEnum.java)
+    - Defines the contract for all dynamic enums
+    - Methods: `getCode()`, `getName()`, `getDescription()`, `getOrder()`
 
-2. **BaseCodeEnum Class** (core/BaseCodeEnum.java)
-   - Abstract base implementation of CodeEnum
-   - Handles common functionality
-   - Must be extended by concrete enum classes
+2. **BaseDyEnum Class** (core/BaseDyEnum.java)
+    - Abstract base implementation of DyEnum
+    - Handles common functionality
+    - Must be extended by concrete enum classes
 
 3. **EnumRegistry Class** (core/EnumRegistry.java)
-   - Central registry storing all enum instances
-   - Uses `ConcurrentHashMap` for thread-safe storage
-   - Key methods:
-     - `register(Class<T>, T)` - Register an enum instance
-     - `valueOf(Class<T>, String)` - Look up by code
-     - `values(Class<T>)` - Get all values for a type
-     - `addEnum(Class<T>, ...)` - Dynamic enum creation
-     - `registerFromConfig(...)` - Load from configuration
+    - Central registry storing all enum instances
+    - Uses `ConcurrentHashMap` for thread-safe storage
+    - Key methods:
+        - `register(Class<T>, T)` - Register an enum instance
+        - `valueOf(Class<T>, String)` - Look up by code
+        - `values(Class<T>)` - Get all values for a type
+        - `addEnum(Class<T>, ...)` - Dynamic enum creation
+        - `registerFromConfig(...)` - Load from configuration
 
 4. **Configuration Loading** (config/)
-   - **FileBasedEnumConfig**: Load enums from .properties files
-   - **DatabaseEnumConfig**: Load enums from database
+    - **FileBasedEnumConfig**: Load enums from .properties files
+    - **DatabaseEnumConfig**: Load enums from database
 
 5. **Spring Integration** (spring/)
-   - **DynamicEnumConfig**: Spring configuration class
-   - **EnumService**: Service layer for accessing enums
-   - **EnumConverter**: Spring Converter for HTTP request binding
+    - **DynamicEnumConfig**: Spring configuration class
+    - **EnumService**: Service layer for accessing enums
+    - **EnumConverter**: Spring Converter for HTTP request binding
 
 ### Design Pattern: Map+Factory
 
 The library uses a registry pattern where:
+
 - Each enum type has its own Map in the central registry
 - Enum instances are created via reflection (Factory pattern)
 - Thread safety is ensured through `ConcurrentHashMap` and synchronized methods
@@ -127,14 +130,15 @@ The library uses a registry pattern where:
 
 ### Creating a New Dynamic Enum
 
-1. Create a class extending `BaseCodeEnum`
+1. Create a class extending `BaseDyEnum`
 2. Define static final instances for predefined values
 3. Ensure a constructor matching: `(String code, String name, String description, int order)`
 4. Register instances in `EnumRegistry` during application startup
 
 Example:
+
 ```java
-public class OrderStatus extends BaseCodeEnum {
+public class OrderStatus extends BaseDyEnum {
     public static final OrderStatus PENDING = new OrderStatus("PENDING", "待处理", "订单等待处理", 1);
     public static final OrderStatus PROCESSING = new OrderStatus("PROCESSING", "处理中", "订单正在处理", 2);
     
@@ -188,7 +192,7 @@ When using with Spring Framework:
 
 ## Testing Strategy
 
-- **Unit Tests**: Test individual components (EnumRegistry, BaseCodeEnum, etc.)
+- **Unit Tests**: Test individual components (EnumRegistry, BaseDyEnum, etc.)
 - **Integration Tests**: Test Spring integration and configuration loading
 - **Thread Safety Tests**: Test concurrent registration and access
 - **Example Test Pattern**:
@@ -217,6 +221,7 @@ When using with Spring Framework:
 The library supports loading enum definitions from configuration files:
 
 **Properties file format:**
+
 ```properties
 OrderStatus.PENDING.code=PENDING
 OrderStatus.PENDING.name=待处理
@@ -230,6 +235,7 @@ OrderStatus.PROCESSING.order=2
 ```
 
 Or from database table (example schema):
+
 ```sql
 CREATE TABLE sys_enum (
     enum_class VARCHAR(100),

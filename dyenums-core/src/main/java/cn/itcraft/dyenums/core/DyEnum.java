@@ -8,8 +8,8 @@ package cn.itcraft.dyenums.core;
  * @author Helly
  * @since 1.0.0
  */
-public interface CodeEnum {
-    
+public interface DyEnum {
+
     /**
      * Gets the unique code for this enum value.
      * This is typically used for storage and identification purposes.
@@ -17,7 +17,7 @@ public interface CodeEnum {
      * @return the unique code
      */
     String getCode();
-    
+
     /**
      * Gets the display name for this enum value.
      * This is typically used for UI display and user-facing text.
@@ -25,7 +25,7 @@ public interface CodeEnum {
      * @return the display name
      */
     String getName();
-    
+
     /**
      * Gets the description for this enum value.
      * This provides additional context or documentation about the enum value.
@@ -33,7 +33,7 @@ public interface CodeEnum {
      * @return the description
      */
     String getDescription();
-    
+
     /**
      * Gets the order/sort index for this enum value.
      * This is used when ordering enum values in lists or dropdowns.

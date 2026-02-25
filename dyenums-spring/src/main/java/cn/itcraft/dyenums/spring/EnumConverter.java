@@ -1,6 +1,6 @@
 package cn.itcraft.dyenums.spring;
 
-import cn.itcraft.dyenums.core.CodeEnum;
+import cn.itcraft.dyenums.core.DyEnum;
 import cn.itcraft.dyenums.core.EnumRegistry;
 import org.springframework.core.convert.converter.Converter;
 
@@ -8,7 +8,7 @@ import org.springframework.core.convert.converter.Converter;
  * Spring Converter for converting String values to dynamic enum instances.
  * This converter enables automatic conversion of request parameters, path variables,
  * and other String inputs to enum types in Spring MVC applications.
- *
+ * <p>
  * To use this converter, register it with Spring's ConversionService:
  * <pre>
  * &#64;Configuration
@@ -21,14 +21,14 @@ import org.springframework.core.convert.converter.Converter;
  * }
  * </pre>
  *
+ * @param <T> the enum type
  * @author Helly
  * @since 1.0.0
- * @param <T> the enum type
  */
-public class EnumConverter<T extends CodeEnum> implements Converter<String, T> {
-    
+public class EnumConverter<T extends DyEnum> implements Converter<String, T> {
+
     private final Class<T> enumClass;
-    
+
     /**
      * Constructs a new EnumConverter for the specified enum class.
      *
@@ -41,7 +41,7 @@ public class EnumConverter<T extends CodeEnum> implements Converter<String, T> {
         }
         this.enumClass = enumClass;
     }
-    
+
     /**
      * Converts a String to the corresponding enum value.
      *
@@ -54,12 +54,12 @@ public class EnumConverter<T extends CodeEnum> implements Converter<String, T> {
         if (code == null || code.trim().isEmpty()) {
             throw new IllegalArgumentException("Enum code cannot be null or empty");
         }
-        
+
         return EnumRegistry.valueOf(enumClass, code)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "No enum constant " + enumClass.getCanonicalName() + "." + code));
+                           .orElseThrow(() -> new IllegalArgumentException(
+                                   "No enum constant " + enumClass.getCanonicalName() + "." + code));
     }
-    
+
     /**
      * Gets the enum class that this converter handles.
      *

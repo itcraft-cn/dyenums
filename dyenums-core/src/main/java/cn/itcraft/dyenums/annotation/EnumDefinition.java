@@ -1,12 +1,16 @@
 package cn.itcraft.dyenums.annotation;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Annotation to mark classes as dynamic enum definitions.
  * This annotation can be used to provide metadata about the enum
  * and control how it's loaded and managed.
- *
+ * <p>
  * Example usage:
  * <pre>
  * &#64;EnumDefinition(
@@ -14,7 +18,7 @@ import java.lang.annotation.*;
  *     dynamic = true,
  *     configSource = "database"
  * )
- * public class UserStatus extends BaseCodeEnum {
+ * public class UserStatus extends BaseDyEnum {
  *     // implementation
  * }
  * </pre>
@@ -26,7 +30,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface EnumDefinition {
-    
+
     /**
      * The category or domain this enum belongs to.
      * Useful for grouping related enums together.
@@ -34,7 +38,7 @@ public @interface EnumDefinition {
      * @return the category name
      */
     String category() default "";
-    
+
     /**
      * Whether this enum supports dynamic values loaded from configuration.
      * If true, additional values can be loaded from files or database.
@@ -42,7 +46,7 @@ public @interface EnumDefinition {
      * @return true if dynamic values are supported, false otherwise
      */
     boolean dynamic() default true;
-    
+
     /**
      * The source from which this enum should load dynamic values.
      * Options: "file", "database", "remote", "none"
@@ -50,21 +54,21 @@ public @interface EnumDefinition {
      * @return the configuration source
      */
     String configSource() default "none";
-    
+
     /**
      * The configuration file path if configSource is "file".
-     * 
+     *
      * @return the configuration file path
      */
     String configPath() default "";
-    
+
     /**
      * Description of the enum's purpose and usage.
      *
      * @return the description
      */
     String description() default "";
-    
+
     /**
      * The order/priority of this enum definition.
      * Used for sorting when multiple enums are processed.

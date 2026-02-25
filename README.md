@@ -4,7 +4,9 @@
 [![Maven](https://img.shields.io/badge/Maven-3.6+-green.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-lightgrey.svg)](https://opensource.org/licenses/Apache-2.0)
 
-**dyenums** is a dynamic enum library for Java 8+ that provides an alternative to Java's static enums. Unlike traditional enums that are fixed at compile time, dyenums allows runtime registration, dynamic loading from configuration files or databases, and extensibility that traditional Java enums cannot provide.
+**dyenums** is a dynamic enum library for Java 8+ that provides an alternative to Java's static enums. Unlike
+traditional enums that are fixed at compile time, dyenums allows runtime registration, dynamic loading from
+configuration files or databases, and extensibility that traditional Java enums cannot provide.
 
 ## 🎯 Key Features
 
@@ -33,7 +35,7 @@ Add the following dependency to your `pom.xml`:
 ### Building from Source
 
 ```bash
-git clone https://github.com/yourusername/dyenums.git
+git clone https://github.com/itcraft-cn/dyenums.git
 cd dyenums
 mvn clean install
 ```
@@ -42,12 +44,12 @@ mvn clean install
 
 ### 1. Define Your Enum Class
 
-Create a class that extends `BaseCodeEnum`:
+Create a class that extends `BaseDyEnum`:
 
 ```java
-import cn.itcraft.dyenums.core.BaseCodeEnum;
+import cn.itcraft.dyenums.core.BaseDyEnum;
 
-public class UserStatus extends BaseCodeEnum {
+public class UserStatus extends BaseDyEnum {
     
     // Predefined values
     public static final UserStatus ACTIVE = new UserStatus("ACTIVE", "激活", "用户已激活", 1);
@@ -236,8 +238,8 @@ public class UserController {
 
 ### Core Components
 
-- **CodeEnum**: Interface defining the contract for all dynamic enums
-- **BaseCodeEnum**: Abstract base class providing default implementations
+- **DyEnum**: Interface defining the contract for all dynamic enums
+- **BaseDyEnum**: Abstract base class providing default implementations
 - **EnumRegistry**: Central registry managing all enum instances
 - **EnumService**: Spring service providing type-safe access to enums
 - **EnumConverter**: Spring converter for automatic type conversion
@@ -246,7 +248,7 @@ public class UserController {
 
 The library uses a registry pattern where:
 
-1. Each enum type has its own `Map<String, CodeEnum>` in a central registry
+1. Each enum type has its own `Map<String, DyEnum>` in a central registry
 2. Enum instances are created via factory methods or reflection
 3. Thread safety is ensured through `ConcurrentHashMap` and synchronization
 4. Configuration can be loaded from multiple sources
@@ -258,6 +260,7 @@ The library includes example implementations:
 ### UserStatus
 
 Represents user account states:
+
 - `ACTIVE`: User account is active
 - `INACTIVE`: User account is inactive
 - `LOCKED`: User account is locked
@@ -280,6 +283,7 @@ if (status.isBlocked()) {
 ### OrderStatus
 
 Represents order processing states:
+
 - `PENDING`: Order created, waiting for processing
 - `PROCESSING`: Order is being processed
 - `CONFIRMED`: Order confirmed, payment verified
@@ -318,7 +322,7 @@ mvn clean test jacoco:report
 
 ### Test Categories
 
-- **Unit Tests**: Test individual components (BaseCodeEnumTest, EnumRegistryTest)
+- **Unit Tests**: Test individual components (BaseDyEnumTest, EnumRegistryTest)
 - **Integration Tests**: Test complete workflows (EnumIntegrationTest)
 - **Thread Safety Tests**: Verify concurrent access safety
 
@@ -429,6 +433,7 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 ## 📞 Support
 
 For questions and support:
+
 - Create an issue on GitHub
 - Check the documentation in the `docs` directory
 - Review the example implementations in the `src/main/java/com/helly/dyenums/model` package

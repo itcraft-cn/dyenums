@@ -1,8 +1,10 @@
-完全正确！**脱离Java enum的约束，采用Map+Factory模式是解决动态枚举需求的最佳实践**。这实际上是很多成熟框架（如Spring、MyBatis）内部处理扩展点的常用模式。
+完全正确！**脱离Java enum的约束，采用Map+Factory模式是解决动态枚举需求的最佳实践**
+。这实际上是很多成熟框架（如Spring、MyBatis）内部处理扩展点的常用模式。
 
 ## 🎯 为什么Map+Factory模式是最佳选择
 
 ### 1. **Java enum的本质限制**
+
 ```java
 // Java enum的设计哲学是"编译时确定，运行时不变"
 // 这是它的优点（类型安全、性能好），但也是动态扩展的障碍
@@ -36,9 +38,10 @@ public class DynamicEnum<T> {
 ## 🔧 完整实现方案
 
 ### 基础框架
+
 ```java
 // 1. 定义通用接口
-public interface CodeEnum {
+public interface DyEnum {
     String getCode();
     String getName();
     String getDescription();
@@ -46,13 +49,13 @@ public interface CodeEnum {
 }
 
 // 2. 基础实现
-public abstract class BaseCodeEnum implements CodeEnum {
+public abstract class BaseDyEnum implements DyEnum {
     protected final String code;
     protected final String name;
     protected final String description;
     protected final int order;
     
-    protected BaseCodeEnum(String code, String name, String description, int order) {
+    protected BaseDyEnum(String code, String name, String description, int order) {
         this.code = code;
         this.name = name;
         this.description = description;
@@ -63,7 +66,7 @@ public abstract class BaseCodeEnum implements CodeEnum {
 }
 
 // 3. 具体枚举类
-public class UserStatus extends BaseCodeEnum {
+public class UserStatus extends BaseDyEnum {
     // 预定义值
     public static final UserStatus ACTIVE = new UserStatus("ACTIVE", "激活", "用户已激活", 1);
     public static final UserStatus INACTIVE = new UserStatus("INACTIVE", "未激活", "用户未激活", 2);
@@ -76,12 +79,13 @@ public class UserStatus extends BaseCodeEnum {
 ```
 
 ### 注册表核心实现
+
 ```java
 public class EnumRegistry {
     private static final Logger logger = LoggerFactory.getLogger(EnumRegistry.class);
     
     // 按枚举类分组的注册表
-    private static final Map<Class<?>, Map<String, CodeEnum>> registries = 
+    private static final Map<Class<?>, Map<String, DyEnum>> registries = 
         new ConcurrentHashMap<>();
     
     // 初始化静态块，注册预定义值
@@ -93,7 +97,7 @@ public class EnumRegistry {
     /**
      * 注册枚举实例
      */
-    public static <T extends CodeEnum> void register(Class<T> enumClass, T enumValue) {
+    public static <T extends DyEnum> void register(Class<T> enumClass, T enumValue) {
         registries.computeIfAbsent(enumClass, k -> new ConcurrentHashMap<>())
                   .put(enumValue.getCode(), enumValue);
         logger.debug("Registered {}: {}", enumClass.getSimpleName(), enumValue.getCode());
@@ -102,14 +106,14 @@ public class EnumRegistry {
     /**
      * 批量注册
      */
-    public static <T extends CodeEnum> void registerAll(Class<T> enumClass, Collection<T> values) {
+    public static <T extends DyEnum> void registerAll(Class<T> enumClass, Collection<T> values) {
         values.forEach(value -> register(enumClass, value));
     }
     
     /**
      * 从配置文件注册
      */
-    public static <T extends CodeEnum> void registerFromConfig(
+    public static <T extends DyEnum> void registerFromConfig(
         Class<T> enumClass, 
         Properties config,
         Function<String, T> factory
@@ -127,7 +131,7 @@ public class EnumRegistry {
     /**
      * 模拟valueOf
      */
-    public static <T extends CodeEnum> Optional<T> valueOf(
+    public static <T extends DyEnum> Optional<T> valueOf(
         Class<T> enumClass, 
         String code
     ) {
@@ -138,21 +142,21 @@ public class EnumRegistry {
     /**
      * 获取所有值
      */
-    public static <T extends CodeEnum> List<T> values(Class<T> enumClass) {
-        Map<String, CodeEnum> map = registries.get(enumClass);
+    public static <T extends DyEnum> List<T> values(Class<T> enumClass) {
+        Map<String, DyEnum> map = registries.get(enumClass);
         if (map == null) {
             return Collections.emptyList();
         }
         return map.values().stream()
                   .map(v -> (T) v)
-                  .sorted(Comparator.comparingInt(CodeEnum::getOrder))
+                  .sorted(Comparator.comparingInt(DyEnum::getOrder))
                   .collect(Collectors.toList());
     }
     
     /**
      * 检查是否包含
      */
-    public static <T extends CodeEnum> boolean contains(Class<T> enumClass, String code) {
+    public static <T extends DyEnum> boolean contains(Class<T> enumClass, String code) {
         return registries.containsKey(enumClass) && 
                registries.get(enumClass).containsKey(code);
     }
@@ -160,7 +164,7 @@ public class EnumRegistry {
     /**
      * 动态添加枚举值
      */
-    public static <T extends CodeEnum> T addEnum(
+    public static <T extends DyEnum> T addEnum(
         Class<T> enumClass, 
         String code, 
         String name, 
@@ -184,8 +188,8 @@ public class EnumRegistry {
     /**
      * 删除枚举值
      */
-    public static <T extends CodeEnum> void remove(Class<T> enumClass, String code) {
-        Map<String, CodeEnum> map = registries.get(enumClass);
+    public static <T extends DyEnum> void remove(Class<T> enumClass, String code) {
+        Map<String, DyEnum> map = registries.get(enumClass);
         if (map != null) {
             map.remove(code);
         }
@@ -211,6 +215,7 @@ public class EnumRegistry {
 ```
 
 ### 配置支持
+
 ```java
 // 1. 基于文件的配置
 public class FileBasedEnumConfig {
@@ -255,7 +260,7 @@ public class DatabaseEnumConfig {
                 
                 // 通过反射注册
                 Class<?> clazz = Class.forName(className);
-                if (CodeEnum.class.isAssignableFrom(clazz)) {
+                if (DyEnum.class.isAssignableFrom(clazz)) {
                     addEnum(clazz, code, name, description, order);
                 }
             }
@@ -267,6 +272,7 @@ public class DatabaseEnumConfig {
 ```
 
 ### 与Spring集成
+
 ```java
 // 1. Spring配置类
 @Configuration
@@ -306,17 +312,17 @@ public class EnumService {
         this.registry = registry;
     }
     
-    public <T extends CodeEnum> List<T> getValues(Class<T> enumClass) {
+    public <T extends DyEnum> List<T> getValues(Class<T> enumClass) {
         return registry.values(enumClass);
     }
     
-    public <T extends CodeEnum> T getByCode(Class<T> enumClass, String code) {
+    public <T extends DyEnum> T getByCode(Class<T> enumClass, String code) {
         return registry.valueOf(enumClass, code)
                       .orElseThrow(() -> new IllegalArgumentException(
                           "No enum constant " + enumClass.getCanonicalName() + "." + code));
     }
     
-    public <T extends CodeEnum> void addEnum(Class<T> enumClass, T enumValue) {
+    public <T extends DyEnum> void addEnum(Class<T> enumClass, T enumValue) {
         registry.register(enumClass, enumValue);
     }
     
@@ -332,6 +338,7 @@ public class EnumService {
 ## 🎨 高级特性实现
 
 ### 1. **注解驱动**
+
 ```java
 // 定义注解
 @Target(ElementType.TYPE)
@@ -344,7 +351,7 @@ public @interface EnumDefinition {
 }
 
 @EnumDefinition(category = "system", dynamic = true, configSource = "db")
-public class UserStatus extends BaseCodeEnum {
+public class UserStatus extends BaseDyEnum {
     // ...
 }
 
@@ -362,6 +369,7 @@ public class EnumAnnotationProcessor {
 ```
 
 ### 2. **热重载支持**
+
 ```java
 @Component
 public class EnumHotReloader {
@@ -375,8 +383,9 @@ public class EnumHotReloader {
 ```
 
 ### 3. **类型安全转换**
+
 ```java
-public class EnumConverter<T extends CodeEnum> implements Converter<String, T> {
+public class EnumConverter<T extends DyEnum> implements Converter<String, T> {
     private final Class<T> enumClass;
     
     public EnumConverter(Class<T> enumClass) {
@@ -404,20 +413,21 @@ public class WebConfig implements WebMvcConfigurer {
 
 ## 📊 优势对比
 
-| 特性 | Java enum | Map+Factory模式 |
-|------|-----------|-----------------|
-| 动态扩展 | ❌ 不支持 | ✅ 完全支持 |
-| 配置化 | ❌ 不支持 | ✅ 天然支持 |
-| 运行时修改 | ❌ 不支持 | ✅ 完全支持 |
-| 类型安全 | ✅ 强类型 | ⚠️ 需要额外检查 |
-| 性能 | ✅ 极佳 | ✅ 优秀（Map查找O(1)） |
-| 序列化 | ✅ 自动支持 | ⚠️ 需要自定义 |
-| IDE支持 | ✅ 完整 | ⚠️ 需要插件支持 |
-| 代码复杂度 | ✅ 简单 | ⚠️ 较复杂 |
+| 特性    | Java enum | Map+Factory模式   |
+|-------|-----------|-----------------|
+| 动态扩展  | ❌ 不支持     | ✅ 完全支持          |
+| 配置化   | ❌ 不支持     | ✅ 天然支持          |
+| 运行时修改 | ❌ 不支持     | ✅ 完全支持          |
+| 类型安全  | ✅ 强类型     | ⚠️ 需要额外检查       |
+| 性能    | ✅ 极佳      | ✅ 优秀（Map查找O(1)） |
+| 序列化   | ✅ 自动支持    | ⚠️ 需要自定义        |
+| IDE支持 | ✅ 完整      | ⚠️ 需要插件支持       |
+| 代码复杂度 | ✅ 简单      | ⚠️ 较复杂          |
 
 ## 🎯 使用场景建议
 
 ### 适合使用Map+Factory的场景：
+
 1. **业务字典/数据字典**：需要在运行时动态添加的配置项
 2. **国际化多语言**：支持动态添加新的语言版本
 3. **插件化系统**：插件可以注册新的枚举值
@@ -425,6 +435,7 @@ public class WebConfig implements WebMvcConfigurer {
 5. **A/B测试**：动态添加测试分组
 
 ### 适合使用Java enum的场景：
+
 1. **系统状态码**：固定不变的状态
 2. **数学常量**：如圆周率、自然对数
 3. **颜色定义**：固定的颜色常量
@@ -434,7 +445,7 @@ public class WebConfig implements WebMvcConfigurer {
 
 ```java
 // 1. 定义你的枚举类型
-public class OrderStatus extends BaseCodeEnum {
+public class OrderStatus extends BaseDyEnum {
     // 预定义值
     public static final OrderStatus PENDING = 
         new OrderStatus("PENDING", "待处理", "订单等待处理", 1);
@@ -478,6 +489,7 @@ List<OrderStatus> allStatuses = EnumRegistry.values(OrderStatus.class);
 
 ## 🎯 总结
 
-**脱离Java enum约束，采用Map+Factory模式是实现动态枚举的成熟、稳定、可扩展的方案**。虽然放弃了Java enum的一些编译时优势，但获得了运行时动态扩展的强大能力。
+**脱离Java enum约束，采用Map+Factory模式是实现动态枚举的成熟、稳定、可扩展的方案**。虽然放弃了Java
+enum的一些编译时优势，但获得了运行时动态扩展的强大能力。
 
 这个方案已经在很多企业级框架中得到验证，是处理动态配置、插件化扩展、多租户场景的优选方案。建议从简单的Map+Factory开始，根据实际需求逐步添加配置支持、Spring集成、热重载等高级特性。

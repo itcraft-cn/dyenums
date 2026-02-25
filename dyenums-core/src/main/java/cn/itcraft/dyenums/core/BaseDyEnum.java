@@ -5,76 +5,76 @@ import java.util.Objects;
 
 /**
  * Abstract base class for dynamic enum implementations.
- * This class provides a default implementation of the CodeEnum interface
+ * This class provides a default implementation of the DyEnum interface
  * and handles common functionality like equals, hashCode, and toString.
- *
+ * <p>
  * Subclasses must provide a constructor that accepts code, name, description, and order.
  *
  * @author Helly
  * @since 1.0.0
  */
-public abstract class BaseCodeEnum implements CodeEnum, Serializable {
-    
+public abstract class BaseDyEnum implements DyEnum, Serializable {
+
     private static final long serialVersionUID = 1L;
-    
+
     protected final String code;
     protected final String name;
     protected final String description;
     protected final int order;
-    
+
     /**
-     * Constructs a new BaseCodeEnum instance.
+     * Constructs a new BaseDyEnum instance.
      *
-     * @param code the unique code for this enum value
-     * @param name the display name for this enum value
+     * @param code        the unique code for this enum value
+     * @param name        the display name for this enum value
      * @param description the description for this enum value
-     * @param order the order/sort index for this enum value
-     * @throws NullPointerException if code or name is null
+     * @param order       the order/sort index for this enum value
+     * @throws NullPointerException     if code or name is null
      * @throws IllegalArgumentException if code or name is empty
      */
-    protected BaseCodeEnum(String code, String name, String description, int order) {
+    protected BaseDyEnum(String code, String name, String description, int order) {
         Objects.requireNonNull(code, "Code cannot be null");
         Objects.requireNonNull(name, "Name cannot be null");
-        
+
         String trimmedCode = code.trim();
         String trimmedName = name.trim();
-        
+
         if (trimmedCode.isEmpty()) {
             throw new IllegalArgumentException("Code cannot be empty");
         }
         if (trimmedName.isEmpty()) {
             throw new IllegalArgumentException("Name cannot be empty");
         }
-        
+
         this.code = trimmedCode;
         this.name = trimmedName;
         this.description = description != null ? description.trim() : "";
         this.order = order;
     }
-    
+
     @Override
     public String getCode() {
         return code;
     }
-    
+
     @Override
     public String getName() {
         return name;
     }
-    
+
     @Override
     public String getDescription() {
         return description;
     }
-    
+
     @Override
     public int getOrder() {
         return order;
     }
-    
+
     /**
      * Compares this enum with another object for equality.
-     * Two BaseCodeEnum instances are equal if they have the same class and code.
+     * Two BaseDyEnum instances are equal if they have the same class and code.
      *
      * @param obj the object to compare
      * @return true if the objects are equal, false otherwise
@@ -87,10 +87,10 @@ public abstract class BaseCodeEnum implements CodeEnum, Serializable {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        BaseCodeEnum that = (BaseCodeEnum) obj;
+        BaseDyEnum that = (BaseDyEnum) obj;
         return Objects.equals(code, that.code);
     }
-    
+
     /**
      * Returns the hash code for this enum value.
      * The hash code is based on the code field.
@@ -101,7 +101,7 @@ public abstract class BaseCodeEnum implements CodeEnum, Serializable {
     public int hashCode() {
         return Objects.hash(code);
     }
-    
+
     /**
      * Returns a string representation of this enum value.
      * The format is: ClassName{code='CODE', name='Name', order=N}

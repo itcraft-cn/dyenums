@@ -1,38 +1,31 @@
 package cn.itcraft.dyenums.core;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
- * Unit tests for BaseCodeEnum.
+ * Unit tests for BaseDyEnum.
  * Tests the base functionality of dynamic enum implementations.
  *
  * @author Helly
  * @since 1.0.0
  */
-public class BaseCodeEnumTest {
-    
-    /**
-     * Test enum for testing purposes.
-     */
-    private static class TestEnum extends BaseCodeEnum {
-        private static final long serialVersionUID = 1L;
-        
-        public TestEnum(String code, String name, String description, int order) {
-            super(code, name, description, order);
-        }
-    }
-    
+public class BaseDyEnumTest {
+
     @Test
     public void testConstructor_ValidValues() {
         TestEnum enumValue = new TestEnum("TEST", "Test Name", "Test Description", 1);
-        
+
         assertEquals("TEST", enumValue.getCode());
         assertEquals("Test Name", enumValue.getName());
         assertEquals("Test Description", enumValue.getDescription());
         assertEquals(1, enumValue.getOrder());
     }
-    
+
     @Test
     public void testConstructor_NullCode() {
         try {
@@ -42,7 +35,7 @@ public class BaseCodeEnumTest {
             assertTrue(e.getMessage().contains("Code cannot be null"));
         }
     }
-    
+
     @Test
     public void testConstructor_NullName() {
         try {
@@ -52,7 +45,7 @@ public class BaseCodeEnumTest {
             assertTrue(e.getMessage().contains("Name cannot be null"));
         }
     }
-    
+
     @Test
     public void testConstructor_EmptyCode() {
         try {
@@ -62,7 +55,7 @@ public class BaseCodeEnumTest {
             assertTrue(e.getMessage().contains("Code cannot be empty"));
         }
     }
-    
+
     @Test
     public void testConstructor_EmptyName() {
         try {
@@ -72,94 +65,105 @@ public class BaseCodeEnumTest {
             assertTrue(e.getMessage().contains("Name cannot be empty"));
         }
     }
-    
+
     @Test
     public void testConstructor_NullDescription() {
         TestEnum enumValue = new TestEnum("TEST", "Test", null, 1);
         assertEquals("", enumValue.getDescription());
     }
-    
+
     @Test
     public void testEquals_SameInstance() {
         TestEnum enumValue = new TestEnum("TEST", "Test", "Desc", 1);
         assertEquals(enumValue, enumValue);
     }
-    
+
     @Test
     public void testEquals_SameCode() {
         TestEnum enumValue1 = new TestEnum("TEST", "Test1", "Desc1", 1);
         TestEnum enumValue2 = new TestEnum("TEST", "Test2", "Desc2", 2);
-        
+
         assertEquals(enumValue1, enumValue2);
     }
-    
+
     @Test
     public void testEquals_DifferentCode() {
         TestEnum enumValue1 = new TestEnum("TEST1", "Test", "Desc", 1);
         TestEnum enumValue2 = new TestEnum("TEST2", "Test", "Desc", 1);
-        
+
         assertNotEquals(enumValue1, enumValue2);
     }
-    
+
     @Test
     public void testEquals_DifferentClass() {
         TestEnum enumValue = new TestEnum("TEST", "Test", "Desc", 1);
         String other = "TEST";
-        
+
         assertNotEquals(enumValue, other);
     }
-    
+
     @Test
     public void testEquals_Null() {
         TestEnum enumValue = new TestEnum("TEST", "Test", "Desc", 1);
         assertNotEquals(enumValue, null);
     }
-    
+
     @Test
     public void testHashCode_SameCode() {
         TestEnum enumValue1 = new TestEnum("TEST", "Test1", "Desc1", 1);
         TestEnum enumValue2 = new TestEnum("TEST", "Test2", "Desc2", 2);
-        
+
         assertEquals(enumValue1.hashCode(), enumValue2.hashCode());
     }
-    
+
     @Test
     public void testHashCode_DifferentCode() {
         TestEnum enumValue1 = new TestEnum("TEST1", "Test", "Desc", 1);
         TestEnum enumValue2 = new TestEnum("TEST2", "Test", "Desc", 1);
-        
+
         assertNotEquals(enumValue1.hashCode(), enumValue2.hashCode());
     }
-    
+
     @Test
     public void testToString() {
         TestEnum enumValue = new TestEnum("TEST_CODE", "Test Name", "Test Description", 5);
         String toString = enumValue.toString();
-        
+
         assertTrue(toString.contains("TestEnum"));
         assertTrue(toString.contains("code='TEST_CODE'"));
         assertTrue(toString.contains("name='Test Name'"));
         assertTrue(toString.contains("order=5"));
     }
-    
+
     @Test
-    public void testImplementsCodeEnum() {
+    public void testImplementsDyEnum() {
         TestEnum enumValue = new TestEnum("TEST", "Test", "Desc", 1);
-        assertTrue(enumValue instanceof CodeEnum);
+        assertTrue(enumValue instanceof DyEnum);
     }
-    
+
     @Test
     public void testImplementsSerializable() {
         TestEnum enumValue = new TestEnum("TEST", "Test", "Desc", 1);
         assertTrue(enumValue instanceof java.io.Serializable);
     }
-    
+
     @Test
     public void testConstructor_TrimsWhitespace() {
         TestEnum enumValue = new TestEnum("  TEST  ", "  Test  ", "  Desc  ", 1);
-        
+
         assertEquals("TEST", enumValue.getCode());
         assertEquals("Test", enumValue.getName());
         assertEquals("Desc", enumValue.getDescription());
+    }
+
+    /**
+     * Test enum for testing purposes.
+     */
+    private static class TestEnum extends BaseDyEnum {
+        private static final long serialVersionUID = 1L;
+
+        public TestEnum(String code, String name, String description, int order) {
+            super(code, name, description, order);
+        }
     }
 }
