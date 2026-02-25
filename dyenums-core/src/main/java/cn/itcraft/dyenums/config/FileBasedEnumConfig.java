@@ -134,13 +134,13 @@ public class FileBasedEnumConfig {
             try {
                 // Check if it's a simple format: UserStatus.ACTIVE=value
                 String simpleValue = config.getProperty("value");
-                if (simpleValue != null) {
+                if (simpleValue == null) {
+                    // Complex format: UserStatus.ACTIVE.name=..., UserStatus.ACTIVE.order=...
+                    LOGGER.warn("Complex format not yet supported for {}.{}", className, code);
+                } else {
                     T enumValue = factory.apply(code, simpleValue);
                     EnumRegistry.register(enumClass, enumValue);
                     count++;
-                } else {
-                    // Complex format: UserStatus.ACTIVE.name=..., UserStatus.ACTIVE.order=...
-                    LOGGER.warn("Complex format not yet supported for {}.{}", className, code);
                 }
             } catch (Exception e) {
                 LOGGER.error("Failed to create enum from config: {}.{}", className, code, e);
