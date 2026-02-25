@@ -4,27 +4,36 @@ This file provides guidance to CodeBuddy Code when working with code in this rep
 
 ## Project Overview
 
-**dyenums** is a dynamic enum library for Java 8 that provides an alternative to Java's static enums. The library uses a
-Map+Factory pattern to enable runtime registration, dynamic loading from configuration files or databases, and
-extensibility that traditional Java enums cannot provide.
+**dyenums** is a dynamic enum library for Java 8+ that provides an alternative to Java's static enums. The library uses a Map+Factory pattern to enable runtime registration, dynamic loading from configuration files or databases, and extensibility that traditional Java enums cannot provide.
+
+This is a **multi-module Maven project** with the following structure:
+- **dyenums-core**: Core library with no external dependencies (except SLF4J)
+- **dyenums-spring**: Spring Framework integration module
+- **dyenums-test**: Test module containing unit tests and example enum implementations
 
 ## Technology Stack
 
 - **Java**: Java 8 (must be compatible with Java 8 features)
-- **Build Tool**: Maven
+- **Build Tool**: Maven (multi-module project)
 - **Key Dependencies**:
-    - Spring Framework (for integration features)
-    - SLF4J (for logging)
-    - JUnit (for testing)
+  - SLF4J (logging)
+  - Spring Framework 5.3.21 (optional, for dyenums-spring)
+  - JUnit 4.13.2 (testing)
 
 ## Build Commands
 
 ```bash
-# Compile the project
+# Build all modules
+mvn clean install
+
+# Compile all modules
 mvn compile
 
-# Run tests
+# Run tests in all modules
 mvn test
+
+# Run tests for a specific module
+mvn test -pl dyenums-core
 
 # Run a single test class
 mvn test -Dtest=ClassName
@@ -32,216 +41,360 @@ mvn test -Dtest=ClassName
 # Run a single test method
 mvn test -Dtest=ClassName#methodName
 
-# Package the library
+# Package all modules
 mvn package
-
-# Install to local repository
-mvn install
 
 # Clean build artifacts
 mvn clean
 
-# Full clean build with tests
-mvn clean install
+# Skip tests during build
+mvn clean install -DskipTests
 ```
 
 ## Project Structure
 
-The project follows standard Maven directory structure:
+This is a Maven multi-module project:
 
 ```
 dyenums/
-├── src/
-│   ├── main/
-│   │   └── java/
-│   │       └── com/
-│   │           └── helly/
-│   │               └── dyenums/
-│   │                   ├── annotation/          # Custom annotations (@EnumDefinition, etc.)
-│   │                   ├── core/                # Core interfaces and base classes
-│   │                   │   ├── DyEnum.java    # Main interface
-│   │                   │   ├── BaseDyEnum.java
-│   │                   │   └── EnumRegistry.java
-│   │                   ├── config/              # Configuration loading
-│   │                   │   ├── FileBasedEnumConfig.java
-│   │                   │   └── DatabaseEnumConfig.java
-│   │                   ├── spring/              # Spring integration
-│   │                   │   ├── DynamicEnumConfig.java
-│   │                   │   ├── EnumService.java
-│   │                   │   └── EnumConverter.java
-│   │                   └── model/               # Example enum implementations
-│   │                       ├── UserStatus.java
-│   │                       └── OrderStatus.java
-│   └── test/
-│       └── java/
-│           └── com/
-│               └── helly/
-│                   └── dyenums/
-│                       ├── core/                # Unit tests for core classes
-│                       └── integration/         # Integration tests
-├── pom.xml
-├── design.md               # Detailed design documentation
-├── todo.md                 # Development requirements
-└── CODEBUDDY.md            # This file
+├── pom.xml                          # Parent POM
+├── CODEBUDDY.md                     # This file
+├── README.md                        # User documentation
+├── design.md                        # Design documentation
+├── dyenums-core/                    # Core module (no Spring dependencies)
+│   ├── pom.xml
+│   └── src/
+│       ├── main/java/cn/itcraft/dyenums/
+│       │   ├── annotation/          # @EnumDefinition annotation
+│       │   ├── config/              # FileBasedEnumConfig, DatabaseEnumConfig
+│       │   └── core/                # Core interfaces and classes
+│       │       ├── DyEnum.java      # Main interface
+│       │       ├── BaseDyEnum.java  # Abstract base implementation
+│       │       └── EnumRegistry.java # Central registry
+│       └── test/java/cn/itcraft/dyenums/
+│           ├── core/                # Unit tests
+│           ├── integration/         # Integration tests
+│           └── model/               # Example enums (UserStatus, OrderStatus)
+├── dyenums-spring/                  # Spring integration module
+│   ├── pom.xml
+│   └── src/main/java/cn/itcraft/dyenums/spring/
+│       ├── DynamicEnumConfig.java   # Spring configuration
+│       ├── EnumService.java         # Service layer
+│       └── EnumConverter.java       # Spring Converter
+└── dyenums-test/                    # Test module (separates examples from core)
+    └── src/test/java/cn/itcraft/dyenums/
+        ├── core/                    # Unit tests
+        ├── integration/             # Integration tests
+        └── model/                   # Example enum implementations
 ```
 
 ## Core Architecture
 
-### Key Components
+### Module: dyenums-core
 
-1. **DyEnum Interface** (core/DyEnum.java)
-    - Defines the contract for all dynamic enums
-    - Methods: `getCode()`, `getName()`, `getDescription()`, `getOrder()`
+**Key Components:**
 
-2. **BaseDyEnum Class** (core/BaseDyEnum.java)
-    - Abstract base implementation of DyEnum
-    - Handles common functionality
-    - Must be extended by concrete enum classes
+1. **DyEnum Interface** (`cn.itcraft.dyenums.core.DyEnum`)
+   - Defines the contract for all dynamic enums
+   - Methods: `getCode()`, `getName()`, `getDescription()`, `getOrder()`
 
-3. **EnumRegistry Class** (core/EnumRegistry.java)
-    - Central registry storing all enum instances
-    - Uses `ConcurrentHashMap` for thread-safe storage
-    - Key methods:
-        - `register(Class<T>, T)` - Register an enum instance
-        - `valueOf(Class<T>, String)` - Look up by code
-        - `values(Class<T>)` - Get all values for a type
-        - `addEnum(Class<T>, ...)` - Dynamic enum creation
-        - `registerFromConfig(...)` - Load from configuration
+2. **BaseDyEnum Class** (`cn.itcraft.dyenums.core.BaseDyEnum`)
+   - Abstract base implementation of DyEnum
+   - Handles equals, hashCode, toString, and validation
+   - Must be extended by concrete enum classes
 
-4. **Configuration Loading** (config/)
-    - **FileBasedEnumConfig**: Load enums from .properties files
-    - **DatabaseEnumConfig**: Load enums from database
+3. **EnumRegistry Class** (`cn.itcraft.dyenums.core.EnumRegistry`)
+   - Central registry storing all enum instances
+   - Uses `ConcurrentHashMap` for thread-safe storage
+   - Key methods:
+     - `register(Class<T>, T)` - Register an enum instance
+     - `valueOf(Class<T>, String)` - Look up by code (returns Optional)
+     - `values(Class<T>)` - Get all values for a type (sorted by order)
+     - `addEnum(Class<T>, ...)` - Dynamic enum creation via reflection
+     - `registerFromConfig(...)` - Load from configuration properties
+     - `remove(Class<T>, String)` - Remove an enum value
 
-5. **Spring Integration** (spring/)
-    - **DynamicEnumConfig**: Spring configuration class
-    - **EnumService**: Service layer for accessing enums
-    - **EnumConverter**: Spring Converter for HTTP request binding
+4. **FileBasedEnumConfig** (`cn.itcraft.dyenums.config.FileBasedEnumConfig`)
+   - Loads enums from properties files
+   - Format: `EnumClass.CODE=name|description|order`
+
+5. **DatabaseEnumConfig** (`cn.itcraft.dyenums.config.DatabaseEnumConfig`)
+   - Loads enums from database using JDBC
+   - Requires DataSource, customizable SQL queries
+
+6. **EnumDefinition Annotation** (`cn.itcraft.dyenums.annotation.EnumDefinition`)
+   - Metadata annotation for enum classes
+   - Properties: category, dynamic, configSource, configPath, etc.
+
+### Module: dyenums-spring
+
+**Spring Integration Components:**
+
+1. **EnumService** (`cn.itcraft.dyenums.spring.EnumService`)
+   - Spring service for type-safe enum access
+   - Methods: `getValues()`, `getByCode()`, `findByCode()`, `createEnum()`, etc.
+   - Converts enums to maps, select options, etc.
+
+2. **EnumConverter** (`cn.itcraft.dyenums.spring.EnumConverter<T>`)
+   - Spring Converter for automatic String-to-enum conversion
+   - Used in Spring MVC for request parameters and path variables
+   - Constructor: `new EnumConverter<>(YourEnum.class)`
+
+3. **DynamicEnumConfig** (`cn.itcraft.dyenums.spring.DynamicEnumConfig`)
+   - Spring configuration class
+   - Defines EnumService bean
+   - Can auto-load configurations on startup
+
+### Module: dyenums-test
+
+**Test and Examples:**
+
+1. **Unit Tests** (`cn.itcraft.dyenums.core.*Test`)
+   - BaseDyEnumTest: Tests base functionality
+   - EnumRegistryTest: Tests registry operations
+
+2. **Integration Tests** (`cn.itcraft.dyenums.integration.EnumIntegrationTest`)
+   - Tests complete workflows
+   - Tests Spring integration
+   - Tests configuration loading
+
+3. **Example Enums** (`cn.itcraft.dyenums.model`)
+   - UserStatus: User account states (ACTIVE, INACTIVE, LOCKED, etc.)
+   - OrderStatus: Order processing states (PENDING, PROCESSING, SHIPPED, etc.)
 
 ### Design Pattern: Map+Factory
 
 The library uses a registry pattern where:
+- Each enum type has its own `Map<String, DyEnum>` in a central registry
+- Enum instances are created via constructors or factory methods
+- Thread safety is ensured through `ConcurrentHashMap` and synchronized blocks
+- Configuration can be loaded from multiple sources (file, database)
 
-- Each enum type has its own Map in the central registry
-- Enum instances are created via reflection (Factory pattern)
-- Thread safety is ensured through `ConcurrentHashMap` and synchronized methods
-- Configuration can be loaded from multiple sources (file, database, remote)
+## Creating a New Dynamic Enum
 
-## Development Guidelines
+### 1. Define Your Enum Class
 
-### Creating a New Dynamic Enum
-
-1. Create a class extending `BaseDyEnum`
-2. Define static final instances for predefined values
-3. Ensure a constructor matching: `(String code, String name, String description, int order)`
-4. Register instances in `EnumRegistry` during application startup
-
-Example:
+Create a class in dyenums-test module (for examples) or your own application:
 
 ```java
+package cn.itcraft.dyenums.model;  // or your application package
+
+import cn.itcraft.dyenums.core.BaseDyEnum;
+import cn.itcraft.dyenums.annotation.EnumDefinition;
+
+@EnumDefinition(category = "business", dynamic = true, configSource = "file")
 public class OrderStatus extends BaseDyEnum {
+    
+    // Predefined values
     public static final OrderStatus PENDING = new OrderStatus("PENDING", "待处理", "订单等待处理", 1);
     public static final OrderStatus PROCESSING = new OrderStatus("PROCESSING", "处理中", "订单正在处理", 2);
     
+    // Private constructor - also used by reflection for dynamic creation
     private OrderStatus(String code, String name, String description, int order) {
         super(code, name, description, order);
+    }
+    
+    // Factory method for configuration loading
+    public static OrderStatus fromValueString(String code, String valueString) {
+        String[] parts = valueString.split("\\|", 3);
+        return new OrderStatus(code, parts[0], parts[1], Integer.parseInt(parts[2]));
+    }
+    
+    // Business logic methods
+    public boolean isInProgress() {
+        return this == PENDING || this == PROCESSING;
     }
 }
 ```
 
-### Registering Enums
+### 2. Register Your Enums (Application Startup)
 
 ```java
-// Register single instance
-EnumRegistry.register(OrderStatus.class, OrderStatus.PENDING);
+import cn.itcraft.dyenums.core.EnumRegistry;
 
-// Register multiple
-EnumRegistry.registerAll(OrderStatus.class, Arrays.asList(
-    OrderStatus.PENDING,
-    OrderStatus.PROCESSING
-));
-
-// Load from configuration
-Properties props = new Properties();
-// ... load properties file
-EnumRegistry.registerFromConfig(OrderStatus.class, props, 
-    code -> new OrderStatus(code, "动态", "动态描述", 999));
+public class Application {
+    public static void main(String[] args) {
+        // Register predefined values
+        EnumRegistry.register(OrderStatus.class, OrderStatus.PENDING);
+        EnumRegistry.register(OrderStatus.class, OrderStatus.PROCESSING);
+        
+        // Load from configuration
+        Properties props = new Properties();
+        props.setProperty("OrderStatus.SHIPPED", "已发货|订单已发货|3");
+        props.setProperty("OrderStatus.DELIVERED", "已送达|订单已送达|4");
+        
+        EnumRegistry.registerFromConfig(
+            OrderStatus.class, 
+            props,
+            OrderStatus::fromValueString
+        );
+    }
+}
 ```
 
-### Using Enums
+### 3. Use in Your Application
 
 ```java
 // Look up by code
 OrderStatus status = EnumRegistry.valueOf(OrderStatus.class, "PENDING")
-    .orElseThrow(() -> new IllegalArgumentException("Invalid status"));
+    .orElseThrow(() -> new IllegalArgumentException("Status not found"));
 
 // Get all values
 List<OrderStatus> allStatuses = EnumRegistry.values(OrderStatus.class);
 
-// Check if exists
-boolean isValid = EnumRegistry.contains(OrderStatus.class, "PENDING");
+// Dynamic creation
+OrderStatus customStatus = EnumRegistry.addEnum(
+    OrderStatus.class,
+    "CUSTOM_STATUS",
+    "自定义状态",
+    "通过代码动态创建的状态",
+    999
+);
 ```
 
-### Spring Integration
+### 4. Spring Integration (Optional)
 
-When using with Spring Framework:
+```java
+import cn.itcraft.dyenums.spring.EnumService;
+import org.springframework.beans.factory.annotation.Autowired;
 
-1. Configure beans in `DynamicEnumConfig`
-2. Use `EnumService` for type-safe access
-3. Register `EnumConverter` for automatic request parameter conversion
-4. Use `@EnumDefinition` annotation for declarative configuration
+@Service
+public class OrderService {
+    
+    @Autowired
+    private EnumService enumService;
+    
+    public List<Map<String, String>> getStatusOptions() {
+        return enumService.asSelectOptions(OrderStatus.class);
+    }
+}
 
-## Testing Strategy
+// In Spring MVC Controller
+@RestController
+@RequestMapping("/orders")
+public class OrderController {
+    
+    @GetMapping("/status/{status}")
+    public List<Order> getOrdersByStatus(@PathVariable OrderStatus status) {
+        // Spring automatically converts path variable using EnumConverter
+        return orderRepository.findByStatus(status.getCode());
+    }
+}
+```
 
-- **Unit Tests**: Test individual components (EnumRegistry, BaseDyEnum, etc.)
-- **Integration Tests**: Test Spring integration and configuration loading
-- **Thread Safety Tests**: Test concurrent registration and access
-- **Example Test Pattern**:
-  ```java
-  @Test
-  public void testEnumRegistration() {
-      EnumRegistry.register(UserStatus.class, UserStatus.ACTIVE);
-      Optional<UserStatus> result = EnumRegistry.valueOf(UserStatus.class, "ACTIVE");
-      assertTrue(result.isPresent());
-      assertEquals("ACTIVE", result.get().getCode());
-  }
-  ```
+## Testing
+
+### Running Tests
+
+```bash
+# All tests
+mvn test
+
+# Core module only
+mvn test -pl dyenums-core
+
+# Specific test class
+mvn test -Dtest=EnumRegistryTest
+
+# Specific test method
+mvn test -Dtest=EnumRegistryTest#testRegister_SingleValue
+```
+
+### Test Coverage
+
+The project includes:
+- **Unit Tests**: Test individual components in isolation
+- **Integration Tests**: Test complete workflows and Spring integration
+- **Thread Safety Tests**: Verify concurrent access safety
+- **Example Enums**: Real-world usage examples
 
 ## Important Notes
 
-- This is a **Java 8** project - must not use features from Java 9+
-- Thread safety is critical - always use `ConcurrentHashMap` and proper synchronization
-- The library should work without Spring (core module has no Spring dependencies)
-- Spring integration should be in a separate module or package
-- All public APIs must be well-documented with JavaDoc
-- Logging should use SLF4J
-- Follow existing code style from design.md examples
+### Module Dependencies
 
-## Configuration Files
+- **dyenums-core**: No dependencies on Spring (can be used standalone)
+- **dyenums-spring**: Depends on dyenums-core and Spring Framework
+- **dyenums-test**: Depends on dyenums-core and dyenums-spring (test scope)
 
-The library supports loading enum definitions from configuration files:
+### Thread Safety
 
-**Properties file format:**
+- EnumRegistry uses ConcurrentHashMap for storage
+- Synchronization on per-class registries for registration
+- Safe for concurrent read and write operations
+
+### Java 8 Compatibility
+
+- Must not use Java 9+ features (e.g., no `List.of()`, no var)
+- Use Java 8 APIs only
+- Tested with Java 8, 11, and 17
+
+### Package Structure
+
+- `cn.itcraft.dyenums.core`: Core interfaces and registry
+- `cn.itcraft.dyenums.config`: Configuration loading classes
+- `cn.itcraft.dyenums.annotation`: Annotations
+- `cn.itcraft.dyenums.spring`: Spring integration
+- `cn.itcraft.dyenums.model`: Example implementations (test module only)
+
+### Best Practices
+
+1. **Registration**: Register enums during application startup
+2. **Factory Methods**: Always provide a factory method for configuration loading
+3. **Immutability**: Treat enum instances as immutable after creation
+4. **Code Uniqueness**: Ensure codes are unique within each enum type
+5. **Documentation**: Document the purpose of each enum value
+6. **Testing**: Test enum registration, lookup, and business logic
+
+## Configuration Examples
+
+### Properties File (enums.properties)
 
 ```properties
-OrderStatus.PENDING.code=PENDING
-OrderStatus.PENDING.name=待处理
-OrderStatus.PENDING.description=订单等待处理
-OrderStatus.PENDING.order=1
+UserStatus.ACTIVE=激活|用户已激活|1
+UserStatus.INACTIVE=未激活|用户未激活|2
+UserStatus.LOCKED=锁定|用户被锁定|3
 
-OrderStatus.PROCESSING.code=PROCESSING
-OrderStatus.PROCESSING.name=处理中
-OrderStatus.PROCESSING.description=订单正在处理
-OrderStatus.PROCESSING.order=2
+OrderStatus.PENDING=待处理|订单等待处理|1
+OrderStatus.PROCESSING=处理中|订单正在处理|2
+OrderStatus.SHIPPED=已发货|订单已发货|3
 ```
 
-Or from database table (example schema):
+### Database Schema
 
 ```sql
 CREATE TABLE sys_enum (
-    enum_class VARCHAR(100),
-    code VARCHAR(50),
-    name VARCHAR(100),
+    enum_class VARCHAR(100) NOT NULL,
+    code VARCHAR(50) NOT NULL,
+    name VARCHAR(100) NOT NULL,
     description VARCHAR(500),
-    sort_order INT
+    sort_order INT DEFAULT 999,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (enum_class, code),
+    INDEX idx_enum_class (enum_class),
+    INDEX idx_sort_order (sort_order)
 );
 ```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **ClassNotFoundException**: Check package names (should be `cn.itcraft.dyenums`)
+2. **No enum constant found**: Ensure enums are registered before use
+3. **Thread safety issues**: Always use EnumRegistry methods, not direct map access
+4. **Spring conversion errors**: Register EnumConverter in WebMvcConfigurer
+
+### Debug Logging
+
+Enable debug logging for `cn.itcraft.dyenums` package to see:
+- Enum registration operations
+- Configuration loading details
+- Dynamic enum creation
+
+## Resources
+
+- **README.md**: User guide and API examples
+- **design.md**: Detailed design decisions and patterns
+- **todo.md**: Development tasks and roadmap
+- **Module POMs**: See dyenums-core/pom.xml, dyenums-spring/pom.xml
