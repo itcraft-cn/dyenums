@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  */
 public class EnumRegistry {
 
-    private static final Logger logger = LoggerFactory.getLogger(EnumRegistry.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnumRegistry.class);
 
     /**
      * Main registry storage: maps enum class to a map of code -> enum instance.
@@ -61,7 +61,7 @@ public class EnumRegistry {
      * Currently a placeholder - subclasses should call register() in their own static blocks.
      */
     private static void registerDefaults() {
-        logger.debug("Initializing EnumRegistry with defaults");
+        LOGGER.debug("Initializing EnumRegistry with defaults");
         // Default registration is handled by enum classes themselves in their static blocks
     }
 
@@ -86,11 +86,11 @@ public class EnumRegistry {
         synchronized (classRegistry) {
             String code = enumValue.getCode();
             if (classRegistry.containsKey(code)) {
-                logger.warn("Overwriting existing enum value for {}: {}",
+                LOGGER.warn("Overwriting existing enum value for {}: {}",
                             enumClass.getSimpleName(), code);
             }
             classRegistry.put(code, enumValue);
-            logger.debug("Registered {}: {}", enumClass.getSimpleName(), code);
+            LOGGER.debug("Registered {}: {}", enumClass.getSimpleName(), code);
         }
     }
 
@@ -142,14 +142,14 @@ public class EnumRegistry {
                     try {
                         T enumValue = factory.apply(code, valueStr);
                         register(enumClass, enumValue);
-                        logger.info("Loaded enum from config: {}.{}",
+                        LOGGER.info("Loaded enum from config: {}.{}",
                                     enumClass.getSimpleName(), code);
                     } catch (Exception e) {
-                        logger.error("Failed to create enum from config: {}.{} = {}",
+                        LOGGER.error("Failed to create enum from config: {}.{} = {}",
                                      enumClass.getSimpleName(), code, valueStr, e);
                     }
                 } else {
-                    logger.warn("Invalid config format for {}.{}: {}",
+                    LOGGER.warn("Invalid config format for {}.{}: {}",
                                 enumClass.getSimpleName(), code, valueStr);
                 }
             }
@@ -272,7 +272,7 @@ public class EnumRegistry {
             T newEnum = constructor.newInstance(code, name, description, order);
             register(enumClass, newEnum);
 
-            logger.info("Dynamically created enum: {}.{}", enumClass.getSimpleName(), code);
+            LOGGER.info("Dynamically created enum: {}.{}", enumClass.getSimpleName(), code);
             return newEnum;
 
         } catch (NoSuchMethodException e) {
@@ -308,7 +308,7 @@ public class EnumRegistry {
         synchronized (classRegistry) {
             boolean removed = classRegistry.remove(code) != null;
             if (removed) {
-                logger.info("Removed enum: {}.{}", enumClass.getSimpleName(), code);
+                LOGGER.info("Removed enum: {}.{}", enumClass.getSimpleName(), code);
             }
             return removed;
         }
@@ -320,7 +320,7 @@ public class EnumRegistry {
      */
     public static void clear() {
         REGISTRIES.clear();
-        logger.warn("Cleared entire enum registry");
+        LOGGER.warn("Cleared entire enum registry");
     }
 
     /**
