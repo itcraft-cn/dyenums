@@ -24,7 +24,7 @@ Add the following dependency to your `pom.xml`:
 
 ```xml
 <dependency>
-    <groupId>com.helly</groupId>
+    <groupId>cn.itcraft</groupId>
     <artifactId>dyenums</artifactId>
     <version>1.0.0</version>
 </dependency>
@@ -45,7 +45,7 @@ mvn clean install
 Create a class that extends `BaseCodeEnum`:
 
 ```java
-import com.helly.dyenums.core.BaseCodeEnum;
+import cn.itcraft.dyenums.core.BaseCodeEnum;
 
 public class UserStatus extends BaseCodeEnum {
     
@@ -64,7 +64,7 @@ public class UserStatus extends BaseCodeEnum {
 ### 2. Register Your Enums
 
 ```java
-import com.helly.dyenums.core.EnumRegistry;
+import cn.itcraft.dyenums.core.EnumRegistry;
 
 public class Application {
     public static void main(String[] args) {
@@ -113,7 +113,7 @@ OrderStatus.PROCESSING=PROCESSING|处理中|订单正在处理|2
 #### Load Configuration
 
 ```java
-import com.helly.dyenums.config.FileBasedEnumConfig;
+import cn.itcraft.dyenums.config.FileBasedEnumConfig;
 import java.util.Properties;
 
 // Load from file
@@ -159,7 +159,7 @@ assertTrue(found.isPresent());
 #### Configuration
 
 ```java
-import com.helly.dyenums.spring.DynamicEnumConfig;
+import cn.itcraft.dyenums.spring.DynamicEnumConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -173,7 +173,7 @@ public class ApplicationConfig {
 #### Using EnumService
 
 ```java
-import com.helly.dyenums.spring.EnumService;
+import cn.itcraft.dyenums.spring.EnumService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -200,7 +200,7 @@ public class UserService {
 #### Spring MVC Converter
 
 ```java
-import com.helly.dyenums.spring.EnumConverter;
+import cn.itcraft.dyenums.spring.EnumConverter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
