@@ -25,6 +25,7 @@
     <modules>
         <module>dyenums-core</module>
         <module>dyenums-spring</module>
+        <module>dyenums-test</module>
     </modules>
 
     <dependencyManagement>
