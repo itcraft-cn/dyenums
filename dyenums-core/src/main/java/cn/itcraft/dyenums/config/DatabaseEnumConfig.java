@@ -32,7 +32,7 @@ import java.util.function.BiFunction;
  */
 public class DatabaseEnumConfig {
 
-    private static final Logger logger = LoggerFactory.getLogger(DatabaseEnumConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseEnumConfig.class);
 
     private DatabaseEnumConfig() {
         throw new UnsupportedOperationException("Utility class should not be instantiated");
@@ -108,18 +108,18 @@ public class DatabaseEnumConfig {
 
                     } catch (Exception e) {
                         String code = rs.getString("code");
-                        logger.error("Failed to create enum from database: {}.{}",
+                        LOGGER.error("Failed to create enum from database: {}.{}",
                                      className, code, e);
                     }
                 }
             }
 
         } catch (Exception e) {
-            logger.error("Failed to load enums from database for class: {}", className, e);
+            LOGGER.error("Failed to load enums from database for class: {}", className, e);
             throw new RuntimeException("Failed to load enums from database", e);
         }
 
-        logger.info("Loaded {} enum values for {} from database", count, className);
+        LOGGER.info("Loaded {} enum values for {} from database", count, className);
         return count;
     }
 
@@ -189,17 +189,17 @@ public class DatabaseEnumConfig {
                         count++;
 
                     } catch (Exception e) {
-                        logger.error("Failed to create enum from database row", e);
+                        LOGGER.error("Failed to create enum from database row", e);
                     }
                 }
             }
 
         } catch (Exception e) {
-            logger.error("Failed to load enums from database for class: {}", className, e);
+            LOGGER.error("Failed to load enums from database for class: {}", className, e);
             throw new RuntimeException("Failed to load enums from database", e);
         }
 
-        logger.info("Loaded {} enum values for {} from database", count, className);
+        LOGGER.info("Loaded {} enum values for {} from database", count, className);
         return count;
     }
 
@@ -220,7 +220,7 @@ public class DatabaseEnumConfig {
             return true;
 
         } catch (Exception e) {
-            logger.warn("Database enum table validation failed: {}", e.getMessage());
+            LOGGER.warn("Database enum table validation failed: {}", e.getMessage());
             return false;
         }
     }

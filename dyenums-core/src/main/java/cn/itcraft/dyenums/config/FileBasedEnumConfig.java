@@ -38,7 +38,7 @@ import java.util.function.BiFunction;
  */
 public class FileBasedEnumConfig {
 
-    private static final Logger logger = LoggerFactory.getLogger(FileBasedEnumConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileBasedEnumConfig.class);
 
     private FileBasedEnumConfig() {
         throw new UnsupportedOperationException("Utility class should not be instantiated");
@@ -69,20 +69,20 @@ public class FileBasedEnumConfig {
 
         // Try to load from classpath first
         try (InputStream is = FileBasedEnumConfig.class.getClassLoader().getResourceAsStream(filePath)) {
-            if (is != null) {
-                props.load(is);
-                logger.info("Loaded enum config from classpath: {}", filePath);
-            } else {
+            if (is == null) {
                 // Try to load from filesystem
                 Path path = Paths.get(filePath);
                 if (Files.exists(path)) {
                     try (InputStream fis = Files.newInputStream(path)) {
                         props.load(fis);
-                        logger.info("Loaded enum config from filesystem: {}", filePath);
+                        LOGGER.info("Loaded enum config from filesystem: {}", filePath);
                     }
                 } else {
                     throw new IOException("Configuration file not found: " + filePath);
                 }
+            } else {
+                props.load(is);
+                LOGGER.info("Loaded enum config from classpath: {}", filePath);
             }
         }
 
@@ -140,14 +140,14 @@ public class FileBasedEnumConfig {
                     count++;
                 } else {
                     // Complex format: UserStatus.ACTIVE.name=..., UserStatus.ACTIVE.order=...
-                    logger.warn("Complex format not yet supported for {}.{}", className, code);
+                    LOGGER.warn("Complex format not yet supported for {}.{}", className, code);
                 }
             } catch (Exception e) {
-                logger.error("Failed to create enum from config: {}.{}", className, code, e);
+                LOGGER.error("Failed to create enum from config: {}.{}", className, code, e);
             }
         }
 
-        logger.info("Loaded {} enum values for {} from properties", count, className);
+        LOGGER.info("Loaded {} enum values for {} from properties", count, className);
         return count;
     }
 
@@ -164,7 +164,7 @@ public class FileBasedEnumConfig {
 
         String[] parts = valueString.split("\\|", 4);
         if (parts.length < 4) {
-            logger.warn("Invalid value format. Expected: code|name|description|order, got: {}", valueString);
+            LOGGER.warn("Invalid value format. Expected: code|name|description|order, got: {}", valueString);
             return null;
         }
 
@@ -186,7 +186,7 @@ public class FileBasedEnumConfig {
         try {
             return Integer.parseInt(orderStr.trim());
         } catch (NumberFormatException e) {
-            logger.warn("Invalid order value: {}, using default: {}", orderStr, defaultOrder);
+            LOGGER.warn("Invalid order value: {}, using default: {}", orderStr, defaultOrder);
             return defaultOrder;
         }
     }

@@ -37,7 +37,7 @@ public class EnumRegistry {
      * Main registry storage: maps enum class to a map of code -> enum instance.
      * Uses ConcurrentHashMap for thread-safe access.
      */
-    private static final Map<Class<?>, Map<String, DyEnum>> registries = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Map<String, DyEnum>> REGISTRIES = new ConcurrentHashMap<>();
 
     /**
      * Static initializer to register default enum values.
@@ -79,7 +79,7 @@ public class EnumRegistry {
 
         // Synchronize on the specific class registry to allow concurrent registration
         // of different enum types while preventing race conditions for the same type
-        Map<String, DyEnum> classRegistry = registries.computeIfAbsent(
+        Map<String, DyEnum> classRegistry = REGISTRIES.computeIfAbsent(
                 enumClass, k -> new ConcurrentHashMap<>()
                                                                       );
 
@@ -172,7 +172,7 @@ public class EnumRegistry {
             return Optional.empty();
         }
 
-        Map<String, DyEnum> classRegistry = registries.get(enumClass);
+        Map<String, DyEnum> classRegistry = REGISTRIES.get(enumClass);
         if (classRegistry == null) {
             return Optional.empty();
         }
@@ -193,7 +193,7 @@ public class EnumRegistry {
     public static <T extends DyEnum> List<T> values(Class<T> enumClass) {
         Objects.requireNonNull(enumClass, "Enum class cannot be null");
 
-        Map<String, DyEnum> classRegistry = registries.get(enumClass);
+        Map<String, DyEnum> classRegistry = REGISTRIES.get(enumClass);
         if (classRegistry == null || classRegistry.isEmpty()) {
             return Collections.emptyList();
         }
@@ -226,7 +226,7 @@ public class EnumRegistry {
             return false;
         }
 
-        Map<String, DyEnum> classRegistry = registries.get(enumClass);
+        Map<String, DyEnum> classRegistry = REGISTRIES.get(enumClass);
         return classRegistry != null && classRegistry.containsKey(code);
     }
 
@@ -300,7 +300,7 @@ public class EnumRegistry {
             return false;
         }
 
-        Map<String, DyEnum> classRegistry = registries.get(enumClass);
+        Map<String, DyEnum> classRegistry = REGISTRIES.get(enumClass);
         if (classRegistry == null) {
             return false;
         }
@@ -319,7 +319,7 @@ public class EnumRegistry {
      * Use with caution - this removes all registered enums.
      */
     public static void clear() {
-        registries.clear();
+        REGISTRIES.clear();
         logger.warn("Cleared entire enum registry");
     }
 
@@ -329,7 +329,7 @@ public class EnumRegistry {
      * @return set of all registered enum classes
      */
     public static Set<Class<?>> getRegisteredClasses() {
-        return new HashSet<>(registries.keySet());
+        return new HashSet<>(REGISTRIES.keySet());
     }
 
     /**
@@ -343,7 +343,7 @@ public class EnumRegistry {
     public static <T extends DyEnum> int getCount(Class<T> enumClass) {
         Objects.requireNonNull(enumClass, "Enum class cannot be null");
 
-        Map<String, DyEnum> classRegistry = registries.get(enumClass);
+        Map<String, DyEnum> classRegistry = REGISTRIES.get(enumClass);
         return classRegistry != null ? classRegistry.size() : 0;
     }
 }
