@@ -8,6 +8,8 @@ This file provides guidance to CodeBuddy Code when working with code in this rep
 
 This is a **multi-module Maven project** with the following structure:
 - **dyenums-core**: Core library with no external dependencies (except SLF4J)
+- **dyenums-config-file**: File-based configuration loader (properties files)
+- **dyenums-config-db**: Database-based configuration loader (JDBC)
 - **dyenums-spring**: Spring Framework integration module
 - **dyenums-test**: Test module containing unit tests and example enum implementations
 
@@ -61,20 +63,24 @@ dyenums/
 ├── CODEBUDDY.md                     # This file
 ├── README.md                        # User documentation
 ├── design.md                        # Design documentation
-├── dyenums-core/                    # Core module (no Spring dependencies)
+├── dyenums-core/                    # Core module (minimal dependencies)
 │   ├── pom.xml
 │   └── src/
-│       ├── main/java/cn/itcraft/dyenums/
-│       │   ├── annotation/          # @EnumDefinition annotation
-│       │   ├── config/              # FileBasedEnumConfig, DatabaseEnumConfig
-│       │   └── core/                # Core interfaces and classes
-│       │       ├── DyEnum.java      # Main interface
-│       │       ├── BaseDyEnum.java  # Abstract base implementation
-│       │       └── EnumRegistry.java # Central registry
-│       └── test/java/cn/itcraft/dyenums/
-│           ├── core/                # Unit tests
-│           ├── integration/         # Integration tests
-│           └── model/               # Example enums (UserStatus, OrderStatus)
+│       └── main/java/cn/itcraft/dyenums/
+│           ├── annotation/          # @EnumDefinition annotation
+│           ├── config/              # EnumConfigLoader interface
+│           └── core/                # Core interfaces and classes
+│               ├── DyEnum.java      # Main interface
+│               ├── BaseDyEnum.java  # Abstract base implementation
+│               └── EnumRegistry.java # Central registry
+├── dyenums-config-file/             # File configuration module
+│   ├── pom.xml
+│   └── src/main/java/cn/itcraft/dyenums/config/file/
+│       └── FileBasedEnumConfig.java # Properties file loader
+├── dyenums-config-db/               # Database configuration module
+│   ├── pom.xml
+│   └── src/main/java/cn/itcraft/dyenums/config/db/
+│       └── DatabaseEnumConfig.java  # JDBC database loader
 ├── dyenums-spring/                  # Spring integration module
 │   ├── pom.xml
 │   └── src/main/java/cn/itcraft/dyenums/spring/
@@ -114,17 +120,36 @@ dyenums/
      - `registerFromConfig(...)` - Load from configuration properties
      - `remove(Class<T>, String)` - Remove an enum value
 
-4. **FileBasedEnumConfig** (`cn.itcraft.dyenums.config.FileBasedEnumConfig`)
-   - Loads enums from properties files
-   - Format: `EnumClass.CODE=name|description|order`
+4. **EnumConfigLoader Interface** (`cn.itcraft.dyenums.config.EnumConfigLoader`)
+   - Interface for loading enum definitions from external sources
+   - Implementations in separate modules for modularity
+   - Methods: `load()`, `validateSource()`
 
-5. **DatabaseEnumConfig** (`cn.itcraft.dyenums.config.DatabaseEnumConfig`)
-   - Loads enums from database using JDBC
-   - Requires DataSource, customizable SQL queries
-
-6. **EnumDefinition Annotation** (`cn.itcraft.dyenums.annotation.EnumDefinition`)
+5. **EnumDefinition Annotation** (`cn.itcraft.dyenums.annotation.EnumDefinition`)
    - Metadata annotation for enum classes
    - Properties: category, dynamic, configSource, configPath, etc.
+
+### Module: dyenums-config-file
+
+**File Configuration Loader:**
+
+**FileBasedEnumConfig** (`cn.itcraft.dyenums.config.file.FileBasedEnumConfig`)
+- Loads enums from properties files
+- Format: `EnumClass.CODE=name|description|order`
+- Supports classpath and filesystem loading
+- Implements `EnumConfigLoader` interface
+- Static utility methods for backward compatibility
+
+### Module: dyenums-config-db
+
+**Database Configuration Loader:**
+
+**DatabaseEnumConfig** (`cn.itcraft.dyenums.config.db.DatabaseEnumConfig`)
+- Loads enums from database using JDBC
+- Requires DataSource, customizable SQL queries
+- Implements `EnumConfigLoader` interface
+- Static utility methods for backward compatibility
+- Provides table creation DDL
 
 ### Module: dyenums-spring
 

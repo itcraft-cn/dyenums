@@ -32,6 +32,22 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- Config File Module -->
+        <dependency>
+            <groupId>cn.itcraft</groupId>
+            <artifactId>dyenums-config-file</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Config DB Module -->
+        <dependency>
+            <groupId>cn.itcraft</groupId>
+            <artifactId>dyenums-config-db</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- SLF4J API -->
         <dependency>
             <groupId>org.slf4j</groupId>

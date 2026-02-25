@@ -1,5 +1,6 @@
-package cn.itcraft.dyenums.config;
+package cn.itcraft.dyenums.config.file;
 
+import cn.itcraft.dyenums.config.EnumConfigLoader;
 import cn.itcraft.dyenums.core.DyEnum;
 import cn.itcraft.dyenums.core.EnumRegistry;
 import org.slf4j.Logger;
@@ -36,39 +37,71 @@ import java.util.function.BiFunction;
  * @author Helly
  * @since 1.0.0
  */
-public class FileBasedEnumConfig {
+public class FileBasedEnumConfig<T extends DyEnum> implements EnumConfigLoader<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileBasedEnumConfig.class);
 
-    private FileBasedEnumConfig() {
-        throw new UnsupportedOperationException("Utility class should not be instantiated");
+    private final String filePath;
+    private final Properties properties;
+
+    /**
+     * Creates a file-based config loader with a file path.
+     *
+     * @param filePath the path to the properties file
+     */
+    public FileBasedEnumConfig(String filePath) {
+        this.filePath = Objects.requireNonNull(filePath, "File path cannot be null");
+        this.properties = null;
     }
 
     /**
-     * Loads enum definitions from a properties file.
-     * The file can be located in the classpath or filesystem.
+     * Creates a file-based config loader with a Properties object.
      *
-     * @param filePath  the path to the properties file
-     * @param enumClass the enum class to load
-     * @param factory   function to create enum instances (code, name, description, order -> enum)
-     * @param <T>       the enum type
-     * @return the number of enums loaded
-     * @throws IOException          if the file cannot be read
-     * @throws NullPointerException if any parameter is null
+     * @param properties the properties containing enum definitions
      */
-    public static <T extends DyEnum> int loadFromFile(
-            String filePath,
-            Class<T> enumClass,
-            BiFunction<String, String, T> factory) throws IOException {
+    public FileBasedEnumConfig(Properties properties) {
+        this.filePath = null;
+        this.properties = Objects.requireNonNull(properties, "Properties cannot be null");
+    }
 
-        Objects.requireNonNull(filePath, "File path cannot be null");
+    @Override
+    public int load(Class<T> enumClass, BiFunction<String, String, T> factory) throws IOException {
         Objects.requireNonNull(enumClass, "Enum class cannot be null");
         Objects.requireNonNull(factory, "Factory cannot be null");
 
+        Properties props;
+        if (properties != null) {
+            props = properties;
+        } else {
+            props = loadPropertiesFromFile();
+        }
+
+        return loadFromPropertiesInternal(props, enumClass, factory);
+    }
+
+    @Override
+    public boolean validateSource() {
+        if (properties != null) {
+            return !properties.isEmpty();
+        }
+        try {
+            Path path = Paths.get(filePath);
+            return Files.exists(path) && Files.isReadable(path);
+        } catch (Exception e) {
+            // Try classpath
+            try (InputStream is = getClass().getClassLoader().getResourceAsStream(filePath)) {
+                return is != null;
+            } catch (Exception ex) {
+                return false;
+            }
+        }
+    }
+
+    private Properties loadPropertiesFromFile() throws IOException {
         Properties props = new Properties();
 
         // Try to load from classpath first
-        try (InputStream is = FileBasedEnumConfig.class.getClassLoader().getResourceAsStream(filePath)) {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(filePath)) {
             if (is == null) {
                 // Try to load from filesystem
                 Path path = Paths.get(filePath);
@@ -86,27 +119,13 @@ public class FileBasedEnumConfig {
             }
         }
 
-        return loadFromProperties(props, enumClass, factory);
+        return props;
     }
 
-    /**
-     * Loads enum definitions from a Properties object.
-     *
-     * @param properties the properties containing enum definitions
-     * @param enumClass  the enum class to load
-     * @param factory    function to create enum instances (fullValue -> enum)
-     * @param <T>        the enum type
-     * @return the number of enums loaded
-     * @throws NullPointerException if any parameter is null
-     */
-    public static <T extends DyEnum> int loadFromProperties(
+    private int loadFromPropertiesInternal(
             Properties properties,
             Class<T> enumClass,
             BiFunction<String, String, T> factory) {
-
-        Objects.requireNonNull(properties, "Properties cannot be null");
-        Objects.requireNonNull(enumClass, "Enum class cannot be null");
-        Objects.requireNonNull(factory, "Factory cannot be null");
 
         int count = 0;
         String className = enumClass.getSimpleName();
@@ -149,6 +168,53 @@ public class FileBasedEnumConfig {
 
         LOGGER.info("Loaded {} enum values for {} from properties", count, className);
         return count;
+    }
+
+    // Static utility methods for backward compatibility
+
+    /**
+     * Loads enum definitions from a properties file.
+     * The file can be located in the classpath or filesystem.
+     *
+     * @param filePath  the path to the properties file
+     * @param enumClass the enum class to load
+     * @param factory   function to create enum instances (code, name, description, order -> enum)
+     * @param <T>       the enum type
+     * @return the number of enums loaded
+     * @throws IOException          if the file cannot be read
+     * @throws NullPointerException if any parameter is null
+     */
+    public static <T extends DyEnum> int loadFromFile(
+            String filePath,
+            Class<T> enumClass,
+            BiFunction<String, String, T> factory) throws IOException {
+
+        FileBasedEnumConfig<T> config = new FileBasedEnumConfig<>(filePath);
+        return config.load(enumClass, factory);
+    }
+
+    /**
+     * Loads enum definitions from a Properties object.
+     *
+     * @param properties the properties containing enum definitions
+     * @param enumClass  the enum class to load
+     * @param factory    function to create enum instances (fullValue -> enum)
+     * @param <T>        the enum type
+     * @return the number of enums loaded
+     * @throws NullPointerException if any parameter is null
+     */
+    public static <T extends DyEnum> int loadFromProperties(
+            Properties properties,
+            Class<T> enumClass,
+            BiFunction<String, String, T> factory) {
+
+        FileBasedEnumConfig<T> config = new FileBasedEnumConfig<>(properties);
+        try {
+            return config.load(enumClass, factory);
+        } catch (IOException e) {
+            // Should not happen with Properties object
+            throw new RuntimeException("Unexpected IO error", e);
+        }
     }
 
     /**
