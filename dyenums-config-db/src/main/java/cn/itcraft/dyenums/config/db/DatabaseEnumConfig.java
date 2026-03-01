@@ -136,10 +136,11 @@ public class DatabaseEnumConfig<T extends DyEnum> implements EnumConfigLoader<T>
 
     @Override
     public boolean validateSource() {
-        try {
-            try (Connection conn = dataSource.getConnection();
-                 PreparedStatement stmt = conn.prepareStatement("SELECT 1 FROM sys_enum WHERE 1 = 0")) {
-                stmt.executeQuery();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT 1 FROM sys_enum LIMIT 1")) {
+            
+            try (java.sql.ResultSet rs = stmt.executeQuery()) {
+                // The query executed successfully, table exists
                 return true;
             }
         } catch (Exception e) {

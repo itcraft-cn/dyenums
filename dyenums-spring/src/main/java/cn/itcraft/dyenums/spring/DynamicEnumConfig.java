@@ -68,11 +68,11 @@ public class DynamicEnumConfig {
     @PostConstruct
     public void initialize() {
         if (autoLoadConfig && configPath != null && !configPath.trim().isEmpty()) {
-            LOGGER.info("Auto-loading enum configurations from: {}", configPath);
-            // Note: Actual loading would require specific enum class knowledge
-            // This is a placeholder that can be extended for specific needs
+            LOGGER.info("Enum auto-loading is enabled from: {}", configPath);
+            LOGGER.info("Actual loading will occur through @EnumDefinition annotation processing or manual loading.");
         } else {
-            LOGGER.debug("Enum auto-loading disabled or no config path specified");
+            LOGGER.debug("Enum auto-loading is disabled (auto-load={}, config-path={})", 
+                        autoLoadConfig, configPath);
         }
     }
 }

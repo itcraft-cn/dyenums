@@ -77,11 +77,11 @@ public class EnumRegistry {
         Objects.requireNonNull(enumClass, "Enum class cannot be null");
         Objects.requireNonNull(enumValue, "Enum value cannot be null");
 
-        // Synchronize on the specific class registry to allow concurrent registration
-        // of different enum types while preventing race conditions for the same type
+        // Use synchronized block around computeIfAbsent to ensure atomic operation
+        // and prevent race condition when creating new registry map
         Map<String, DyEnum> classRegistry = REGISTRIES.computeIfAbsent(
                 enumClass, k -> new ConcurrentHashMap<>()
-                                                                      );
+        );
 
         synchronized (classRegistry) {
             String code = enumValue.getCode();

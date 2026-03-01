@@ -76,7 +76,7 @@ public class OrderStatus extends BaseDyEnum {
     public static final OrderStatus FAILED = new OrderStatus(
             "FAILED", "处理失败", "订单处理失败", 8
     );
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 4241612533037940994L;
 
     /**
      * Private constructor for predefined values.

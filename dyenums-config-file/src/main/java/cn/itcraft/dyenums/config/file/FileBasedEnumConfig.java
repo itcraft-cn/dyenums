@@ -153,13 +153,27 @@ public class FileBasedEnumConfig<T extends DyEnum> implements EnumConfigLoader<T
             try {
                 // Check if it's a simple format: UserStatus.ACTIVE=value
                 String simpleValue = config.getProperty("value");
-                if (simpleValue == null) {
-                    // Complex format: UserStatus.ACTIVE.name=..., UserStatus.ACTIVE.order=...
-                    LOGGER.warn("Complex format not yet supported for {}.{}", className, code);
-                } else {
+                if (simpleValue != null) {
                     T enumValue = factory.apply(code, simpleValue);
                     EnumRegistry.register(enumClass, enumValue);
                     count++;
+                } else {
+                    // Complex format: UserStatus.ACTIVE.name=..., UserStatus.ACTIVE.order=...
+                    // Try to construct the required format for the factory method
+                    String name = config.getProperty("name");
+                    String description = config.getProperty("description", "");
+                    String orderStr = config.getProperty("order", "999");
+                    int order = parseOrder(orderStr, 999);
+                    
+                    // If name exists, use the formatted string as needed by default factories
+                    if (name != null) {
+                        String valueString = String.format("%s|%s|%d", name, description, order);
+                        T enumValue = factory.apply(code, valueString);
+                        EnumRegistry.register(enumClass, enumValue);
+                        count++;
+                    } else {
+                        LOGGER.warn("Incomplete complex format for {}.{} - missing required 'name' property", className, code);
+                    }
                 }
             } catch (Exception e) {
                 LOGGER.error("Failed to create enum from config: {}.{}", className, code, e);

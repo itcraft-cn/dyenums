@@ -54,7 +54,7 @@ public class UserStatus extends BaseDyEnum {
     public static final UserStatus PENDING = new UserStatus(
             "PENDING", "待验证", "用户待验证", 5
     );
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 3145336379884807160L;
 
     /**
      * Private constructor for predefined values.

@@ -15,7 +15,7 @@ import java.util.Objects;
  */
 public abstract class BaseDyEnum implements DyEnum, Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -533038945084607168L;
 
     protected final String code;
     protected final String name;
