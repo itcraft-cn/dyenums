@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -77,12 +78,23 @@ public class EnumRegistry {
         Objects.requireNonNull(enumClass, "Enum class cannot be null");
         Objects.requireNonNull(enumValue, "Enum value cannot be null");
 
-        // Use synchronized block around computeIfAbsent to ensure atomic operation
-        // and prevent race condition when creating new registry map
-        Map<String, DyEnum> classRegistry = REGISTRIES.computeIfAbsent(
-                enumClass, k -> new ConcurrentHashMap<>()
-        );
+        long startTime = System.nanoTime();
 
+        // Use double-checked locking pattern with global lock when creating new registry
+        Map<String, DyEnum> classRegistry = REGISTRIES.get(enumClass);
+        if (classRegistry == null) {
+            synchronized (EnumRegistry.class) {
+                // Double-check to avoid creating unnecessary map if another thread has already inserted
+                classRegistry = REGISTRIES.get(enumClass);
+                if (classRegistry == null) {
+                    classRegistry = new ConcurrentHashMap<>();
+                    REGISTRIES.put(enumClass, classRegistry);
+                }
+            }
+        }
+
+        // Synchronize on the specific registry map for this enum class to allow
+        // registration of different enum types to proceed in parallel 
         synchronized (classRegistry) {
             String code = enumValue.getCode();
             if (classRegistry.containsKey(code)) {
@@ -92,10 +104,13 @@ public class EnumRegistry {
             classRegistry.put(code, enumValue);
             LOGGER.debug("Registered {}: {}", enumClass.getSimpleName(), code);
         }
+        
+        // Record performance metric
+        EnumPerformanceMonitor.recordRegister(startTime, enumClass);
     }
 
     /**
-     * Registers multiple enum instances.
+     * Registers multiple enum instances efficiently.
      *
      * @param enumClass the enum class type
      * @param values    collection of enum instances to register
@@ -106,7 +121,33 @@ public class EnumRegistry {
         Objects.requireNonNull(enumClass, "Enum class cannot be null");
         Objects.requireNonNull(values, "Values cannot be null");
 
-        values.forEach(value -> register(enumClass, value));
+        Map<String, DyEnum> classRegistry = REGISTRIES.get(enumClass);
+        if (classRegistry == null) {
+            // If there's no existing registry, we can register all at once more efficiently
+            synchronized (EnumRegistry.class) {
+                // Double-check for consistency with register method pattern
+                classRegistry = REGISTRIES.get(enumClass);
+                if (classRegistry == null) {
+                    classRegistry = new ConcurrentHashMap<>();
+                    REGISTRIES.put(enumClass, classRegistry);
+                }
+            }
+        }
+
+        // Perform all registrations under a single synchronization for this enum class
+        // to improve performance when registering many values at once
+        synchronized (classRegistry) {
+            for (T value : values) {
+                Objects.requireNonNull(value, "Enum value in collection cannot be null");
+                String code = value.getCode();
+                if (classRegistry.containsKey(code)) {
+                    LOGGER.warn("Overwriting existing enum value for {}: {}",
+                                enumClass.getSimpleName(), code);
+                }
+                classRegistry.put(code, value);
+            }
+            LOGGER.debug("Registered {} values for {}", values.size(), enumClass.getSimpleName());
+        }
     }
 
     /**
@@ -127,33 +168,52 @@ public class EnumRegistry {
         Objects.requireNonNull(config, "Config cannot be null");
         Objects.requireNonNull(factory, "Factory cannot be null");
 
-        config.forEach((key, value) -> {
-            String fullKey = key.toString();
-            String[] parts = fullKey.split("\\.");
+        for (Map.Entry<Object, Object> entry : config.entrySet()) {
+            Object keyObj = entry.getKey();
+            Object valueObj = entry.getValue();
+            
+            if (keyObj == null || valueObj == null) {
+                LOGGER.warn("Skipping null key or value in config for enum: {}", enumClass.getSimpleName());
+                continue;
+            }
+            
+            String fullKey = keyObj.toString();
+            String valueStr = valueObj.toString();
+            
+            if (fullKey.trim().isEmpty() || valueStr.trim().isEmpty()) {
+                LOGGER.warn("Skipping empty key or value in config: {}", fullKey);
+                continue;
+            }
+            
+            String[] parts = fullKey.split("\\.", 2); // Limit to 2 splits for efficiency
 
             // Check if this property belongs to our enum class
-            if (parts.length >= 2 && parts[0].equals(enumClass.getSimpleName())) {
+            if (parts.length == 2 && parts[0].equals(enumClass.getSimpleName())) {
                 String code = parts[1];
-                String valueStr = value.toString();
+                if (code.trim().isEmpty()) {
+                    LOGGER.warn("Invalid configuration key format: '{}' for enum '{}'", fullKey, enumClass.getSimpleName());
+                    continue;
+                }
 
                 // Parse value format: name|description|order
                 String[] valueParts = valueStr.split("\\|", 3);
                 if (valueParts.length >= 3) {
                     try {
+                        // Call factory with the code and the value string
                         T enumValue = factory.apply(code, valueStr);
                         register(enumClass, enumValue);
-                        LOGGER.info("Loaded enum from config: {}.{}",
-                                    enumClass.getSimpleName(), code);
+                        LOGGER.info("Successfully loaded enum from config: {}.{}", 
+                                   enumClass.getSimpleName(), code);
                     } catch (Exception e) {
-                        LOGGER.error("Failed to create enum from config: {}.{} = {}",
-                                     enumClass.getSimpleName(), code, valueStr, e);
+                        LOGGER.error("Failed to create enum from config: {}.{} = {}, error: {}", 
+                                    enumClass.getSimpleName(), code, valueStr, e.getMessage());
                     }
                 } else {
-                    LOGGER.warn("Invalid config format for {}.{}: {}",
-                                enumClass.getSimpleName(), code, valueStr);
+                    LOGGER.warn("Invalid config format for {}.{}: {} - expected format: 'name|description|order'", 
+                               enumClass.getSimpleName(), code, valueStr);
                 }
             }
-        });
+        }
     }
 
     /**
@@ -168,17 +228,24 @@ public class EnumRegistry {
     public static <T extends DyEnum> Optional<T> valueOf(Class<T> enumClass, String code) {
         Objects.requireNonNull(enumClass, "Enum class cannot be null");
 
+        long startTime = System.nanoTime();
+
         if (code == null) {
+            EnumPerformanceMonitor.recordValueOf(startTime, enumClass);
             return Optional.empty();
         }
 
         Map<String, DyEnum> classRegistry = REGISTRIES.get(enumClass);
         if (classRegistry == null) {
+            EnumPerformanceMonitor.recordValueOf(startTime, enumClass);
             return Optional.empty();
         }
 
         @SuppressWarnings("unchecked")
         T result = (T) classRegistry.get(code);
+        
+        // Record performance metric
+        EnumPerformanceMonitor.recordValueOf(startTime, enumClass);
         return Optional.ofNullable(result);
     }
 
@@ -193,20 +260,28 @@ public class EnumRegistry {
     public static <T extends DyEnum> List<T> values(Class<T> enumClass) {
         Objects.requireNonNull(enumClass, "Enum class cannot be null");
 
+        long startTime = System.nanoTime();
+
         Map<String, DyEnum> classRegistry = REGISTRIES.get(enumClass);
         if (classRegistry == null || classRegistry.isEmpty()) {
+            EnumPerformanceMonitor.recordValues(startTime, enumClass);
             return Collections.emptyList();
         }
 
-        List<T> result = classRegistry.values().stream()
-                                      .map(v -> {
-                                          @SuppressWarnings("unchecked")
-                                          T typedValue = (T) v;
-                                          return typedValue;
-                                      })
-                                      .sorted(Comparator.comparingInt(DyEnum::getOrder))
-                                      .collect(Collectors.toList());
+        // Pre-calculate size to avoid resizing and use manual iteration to convert types
+        // This is more efficient than streams for this use case
+        List<T> result = new ArrayList<>(classRegistry.size());
+        for (DyEnum value : classRegistry.values()) {
+            @SuppressWarnings("unchecked")
+            T typedValue = (T) value;
+            result.add(typedValue);
+        }
+        
+        // Sort by order once all items collected
+        result.sort(Comparator.comparingInt(DyEnum::getOrder));
 
+        // Record performance metric
+        EnumPerformanceMonitor.recordValues(startTime, enumClass);
         return Collections.unmodifiableList(result);
     }
 
@@ -255,6 +330,8 @@ public class EnumRegistry {
         Objects.requireNonNull(code, "Code cannot be null");
         Objects.requireNonNull(name, "Name cannot be null");
 
+        long startTime = System.nanoTime();
+
         if (code.trim().isEmpty()) {
             throw new IllegalArgumentException("Code cannot be empty");
         }
@@ -266,21 +343,29 @@ public class EnumRegistry {
             // Look for constructor: (String, String, String, int)
             Constructor<T> constructor = enumClass.getDeclaredConstructor(
                     String.class, String.class, String.class, int.class
-                                                                         );
+            );
             constructor.setAccessible(true);
 
-            T newEnum = constructor.newInstance(code, name, description, order);
+            T newEnum = constructor.newInstance(code.trim(), name.trim(), 
+                                              description != null ? description.trim() : "", order);
             register(enumClass, newEnum);
 
             LOGGER.info("Dynamically created enum: {}.{}", enumClass.getSimpleName(), code);
+            
+            // Record performance metric
+            EnumPerformanceMonitor.recordAddEnum(startTime, enumClass);
             return newEnum;
 
         } catch (NoSuchMethodException e) {
             throw new IllegalStateException(
                     "Enum class " + enumClass.getSimpleName() +
-                            " must have a constructor (String, String, String, int)", e);
+                            " must have a public/accessible constructor (String, String, String, int)", e);
+        } catch (InstantiationException e) {
+            throw new IllegalStateException(
+                    "Enum class " + enumClass.getSimpleName() + " cannot be instantiated via reflection", e);
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to create enum instance", e);
+            throw new IllegalStateException(
+                    "Failed to create enum instance of class " + enumClass.getSimpleName(), e);
         }
     }
 
@@ -296,22 +381,30 @@ public class EnumRegistry {
     public static <T extends DyEnum> boolean remove(Class<T> enumClass, String code) {
         Objects.requireNonNull(enumClass, "Enum class cannot be null");
 
+        long startTime = System.nanoTime();
+
         if (code == null) {
+            EnumPerformanceMonitor.recordRemove(startTime, enumClass);
             return false;
         }
 
         Map<String, DyEnum> classRegistry = REGISTRIES.get(enumClass);
         if (classRegistry == null) {
+            EnumPerformanceMonitor.recordRemove(startTime, enumClass);
             return false;
         }
 
+        boolean removed;
         synchronized (classRegistry) {
-            boolean removed = classRegistry.remove(code) != null;
+            removed = classRegistry.remove(code) != null;
             if (removed) {
                 LOGGER.info("Removed enum: {}.{}", enumClass.getSimpleName(), code);
             }
-            return removed;
         }
+        
+        // Record performance metric
+        EnumPerformanceMonitor.recordRemove(startTime, enumClass);
+        return removed;
     }
 
     /**
@@ -345,5 +438,34 @@ public class EnumRegistry {
 
         Map<String, DyEnum> classRegistry = REGISTRIES.get(enumClass);
         return classRegistry != null ? classRegistry.size() : 0;
+    }
+    
+    /**
+     * Gets all enum codes for a class, sorted by order.
+     * Provides better performance when only codes are needed.
+     *
+     * @param enumClass the enum class type
+     * @param <T>       the enum type
+     * @return list of all enum codes, sorted by order
+     * @throws NullPointerException if enumClass is null
+     */
+    public static <T extends DyEnum> List<String> codes(Class<T> enumClass) {
+        Objects.requireNonNull(enumClass, "Enum class cannot be null");
+
+        Map<String, DyEnum> classRegistry = REGISTRIES.get(enumClass);
+        if (classRegistry == null || classRegistry.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Sort by order and extract codes
+        List<Map.Entry<String, DyEnum>> entries = new ArrayList<>(classRegistry.entrySet());
+        entries.sort(Map.Entry.comparingByValue((e1, e2) -> Integer.compare(e1.getOrder(), e2.getOrder())));
+        
+        List<String> result = new ArrayList<>(entries.size());
+        for (Map.Entry<String, DyEnum> entry : entries) {
+            result.add(entry.getKey());
+        }
+
+        return Collections.unmodifiableList(result);
     }
 }

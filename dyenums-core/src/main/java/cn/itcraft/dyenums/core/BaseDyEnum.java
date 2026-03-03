@@ -88,7 +88,11 @@ public abstract class BaseDyEnum implements DyEnum, Serializable {
             return false;
         }
         BaseDyEnum that = (BaseDyEnum) obj;
-        return Objects.equals(code, that.code);
+        
+        // Since all field values are set by constructor and guaranteed non-null via validation,
+        // we only need to compare the code field for semantic equality
+        // Code is the business identifier that makes each enum value unique within a class
+        return Objects.equals(this.code, that.code);
     }
 
     /**
