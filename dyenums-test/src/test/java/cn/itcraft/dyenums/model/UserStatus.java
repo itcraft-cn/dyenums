@@ -3,6 +3,8 @@ package cn.itcraft.dyenums.model;
 import cn.itcraft.dyenums.annotation.EnumDefinition;
 import cn.itcraft.dyenums.core.BaseDyEnum;
 
+import java.util.Objects;
+
 /**
  * User status enum representing different states a user can be in.
  * This is an example implementation of a dynamic enum.
@@ -74,11 +76,15 @@ public class UserStatus extends BaseDyEnum {
      * Used by configuration loading mechanisms.
      *
      * @param code        the unique code
-     * @param valueString value in format: code|name|description|order
+     * @param valueString value in format: name|description|order
      * @return new UserStatus instance
+     * @throws NullPointerException     if code or valueString is null
      * @throws IllegalArgumentException if valueString format is invalid
      */
     public static UserStatus fromValueString(String code, String valueString) {
+        Objects.requireNonNull(code, "Code cannot be null");
+        Objects.requireNonNull(valueString, "Value string cannot be null");
+
         String[] parts = valueString.split("\\|", 3);
         if (parts.length < 3) {
             throw new IllegalArgumentException(
@@ -86,11 +92,22 @@ public class UserStatus extends BaseDyEnum {
             );
         }
 
-        String name = parts[0];
-        String description = parts[1];
-        int order = Integer.parseInt(parts[2]);
+        String name = parts[0].trim();
+        String description = parts[1].trim();
 
-        return new UserStatus(code, name, description, order);
+        if (name.isEmpty()) {
+            throw new IllegalArgumentException("Name cannot be empty");
+        }
+
+        int order;
+        try {
+            order = Integer.parseInt(parts[2].trim());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(
+                    "Invalid order value: " + parts[2] + ", expected integer", e);
+        }
+
+        return new UserStatus(code.trim(), name, description, order);
     }
 
     /**

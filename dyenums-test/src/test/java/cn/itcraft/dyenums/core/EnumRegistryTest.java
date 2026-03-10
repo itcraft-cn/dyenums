@@ -1,5 +1,6 @@
 package cn.itcraft.dyenums.core;
 
+import cn.itcraft.dyenums.annotation.EnumDefinition;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -320,6 +321,7 @@ public class EnumRegistryTest {
     /**
      * Test enum for testing purposes.
      */
+    @EnumDefinition(category = "test", dynamic = true, description = "Test enum")
     public static class TestEnum extends BaseDyEnum {
         public static final TestEnum VALUE1 = new TestEnum("VALUE1", "Value One", "First value", 1);
         public static final TestEnum VALUE2 = new TestEnum("VALUE2", "Value Two", "Second value", 2);
@@ -342,6 +344,7 @@ public class EnumRegistryTest {
     /**
      * Another test enum to verify class isolation.
      */
+    @EnumDefinition(category = "test", dynamic = true, description = "Another test enum")
     public static class AnotherEnum extends BaseDyEnum {
         private static final long serialVersionUID = 1L;
 

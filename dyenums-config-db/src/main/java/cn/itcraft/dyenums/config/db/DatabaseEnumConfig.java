@@ -67,16 +67,44 @@ public class DatabaseEnumConfig<T extends DyEnum> implements EnumConfigLoader<T>
      * @param dataSource the data source to use
      * @param query the SQL query to execute
      * @param columnMappings array of column names in order: [code, name, description, order]
+     * @throws IllegalArgumentException if query contains forbidden SQL keywords or is not a SELECT statement
      */
     public DatabaseEnumConfig(DataSource dataSource, String query, String[] columnMappings) {
         this.dataSource = Objects.requireNonNull(dataSource, "DataSource cannot be null");
-        this.query = Objects.requireNonNull(query, "Query cannot be null");
+        this.query = validateQuery(Objects.requireNonNull(query, "Query cannot be null"));
         this.columnMappings = Objects.requireNonNull(columnMappings, "Column mappings cannot be null");
         
         if (columnMappings.length < 4) {
             throw new IllegalArgumentException(
                     "Column mappings must have at least 4 elements: [code, name, description, order]");
         }
+    }
+
+    /**
+     * Validates that the query is safe and is a SELECT statement.
+     *
+     * @param query the SQL query to validate
+     * @return the validated query
+     * @throws IllegalArgumentException if the query is invalid
+     */
+    private String validateQuery(String query) {
+        String upperQuery = query.toUpperCase().trim();
+        
+        // Must be a SELECT statement
+        if (!upperQuery.startsWith("SELECT")) {
+            throw new IllegalArgumentException("Query must be a SELECT statement");
+        }
+        
+        // Check for forbidden keywords (basic SQL injection prevention)
+        String[] forbiddenKeywords = {"DROP", "DELETE", "TRUNCATE", "ALTER", "INSERT", "UPDATE", "EXEC", "EXECUTE"};
+        for (String keyword : forbiddenKeywords) {
+            if (upperQuery.contains(keyword)) {
+                throw new IllegalArgumentException(
+                    "Query contains forbidden SQL keyword: " + keyword);
+            }
+        }
+        
+        return query;
     }
 
     @Override
@@ -108,12 +136,10 @@ public class DatabaseEnumConfig<T extends DyEnum> implements EnumConfigLoader<T>
                             order = 999; // default order
                         }
 
-                        // Create value string in format: code|name|description|order
-                        String valueString = String.format("%s|%s|%s|%d",
-                                                           code,
-                                                           name != null ? name : code,
-                                                           description != null ? description : "",
-                                                           order);
+                        // Create value string using direct concatenation (faster than String.format)
+                        String effectiveName = name != null ? name : code;
+                        String effectiveDesc = description != null ? description : "";
+                        String valueString = effectiveName + "|" + effectiveDesc + "|" + order;
 
                         T enumValue = factory.apply(code, valueString);
                         EnumRegistry.register(enumClass, enumValue);

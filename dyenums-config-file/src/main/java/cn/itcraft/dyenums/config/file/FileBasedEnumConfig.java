@@ -48,10 +48,47 @@ public class FileBasedEnumConfig<T extends DyEnum> implements EnumConfigLoader<T
      * Creates a file-based config loader with a file path.
      *
      * @param filePath the path to the properties file
+     * @throws IllegalArgumentException if the path contains invalid characters
      */
     public FileBasedEnumConfig(String filePath) {
-        this.filePath = Objects.requireNonNull(filePath, "File path cannot be null");
+        Objects.requireNonNull(filePath, "File path cannot be null");
+        this.filePath = validateFilePath(filePath);
         this.properties = null;
+    }
+
+    /**
+     * Validates the file path for security.
+     *
+     * @param filePath the path to validate
+     * @return the validated path
+     * @throws IllegalArgumentException if the path is invalid
+     */
+    private String validateFilePath(String filePath) {
+        String trimmed = filePath.trim();
+        
+        // Prevent path traversal attacks
+        if (trimmed.contains("..")) {
+            throw new IllegalArgumentException(
+                "File path cannot contain parent directory references (..)");
+        }
+        
+        // Normalize the path
+        try {
+            Path normalized = Paths.get(trimmed).normalize();
+            String normalizedPath = normalized.toString();
+            
+            // Double-check after normalization
+            if (normalizedPath.contains("..")) {
+                throw new IllegalArgumentException(
+                    "File path cannot contain parent directory references (..)");
+            }
+            
+            return trimmed;
+        } catch (Exception e) {
+            // If path is invalid for the filesystem, just return trimmed version
+            // (it might be a classpath resource)
+            return trimmed;
+        }
     }
 
     /**
@@ -167,7 +204,8 @@ public class FileBasedEnumConfig<T extends DyEnum> implements EnumConfigLoader<T
                     
                     // If name exists, use the formatted string as needed by default factories
                     if (name != null) {
-                        String valueString = String.format("%s|%s|%d", name, description, order);
+                        // Use direct concatenation for better performance
+                        String valueString = name + "|" + description + "|" + order;
                         T enumValue = factory.apply(code, valueString);
                         EnumRegistry.register(enumClass, enumValue);
                         count++;
