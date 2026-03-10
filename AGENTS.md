@@ -8,23 +8,29 @@
     - 在设计细节时，充分考虑各设计模式及各语言特性
 2. 你是资深全栈开发
     - 对Java的SDK/第三方库均非常了解，对JDK各版本间细节均了解，对JVM调优也非常擅长，尤擅长性能调优/反射/多线程/Unsafe底层/网络通讯，对JVM内存布局非常清楚，开发上偏好OOP+interface
-    - 对Rust非常了解，对Rust的官方库及周边库均了解，对Rust的RAII机制理解深刻，对Rust的内存布局非常清楚，开发上偏好过程式+trait多态，对CPU指令也熟悉
-    - 对C非常了解，对Linux/Windows底层库均非常熟悉，对C的内存布局非常清楚，开发上偏好过程式+函数指针，对CPU指令也熟悉
-    - 对C++非常了解，对Linux/Windows底层库均非常熟悉，对现代C++理念贯彻彻底，对C++的内存布局非常清楚，开发上偏好过程式+函数指针，对CPU指令也熟悉
-    - 对Python非常了解，对常见库均非常熟悉
-    - 对JS/TS非常了解，可进行常见UI交互设计，设计感在线
 
 ## 交互规则
 
 1. 每次沟通产出文件后，均进行git提交
 2. git仅仅以当前user.name提交，不推送到远端
 
+## 项目架构
+
+dyenums 是一个 Java 8+ 动态枚举库，采用 Map+Factory 模式解决 Java 静态枚举的运行时扩展问题。
+
+### 模块结构：
+- **dyenums-core**: 核心接口与实现 (DyEnum, BaseDyEnum, EnumRegistry, EnumPerformanceMonitor)
+- **dyenums-spring**: Spring 集成 (EnumService, EnumConverter, DynamicEnumConfig)
+- **dyenums-config-file**: 文件配置加载 (FileBasedEnumConfig)
+- **dyenums-config-db**: 数据库配置加载 (DatabaseEnumConfig)
+- **dyenums-test**: 测试模块和示例枚举
+
 ## 编码规范
 
 ### 通用规则
 
 1. 不使用尾注释
-2. 静态不可变变量名大写
+2. 静态不可变变量名大写 (如: `serialVersionUID`)
 3. 静态可变变量名小写
 
 ## Build / Lint / Test Commands
@@ -106,3 +112,32 @@
 - Use appropriate log levels (info for significant operations, debug for trace, warn/error for problems)
 - Log important operations like `Dynamically created enum`
 - Use placeholders in log messages: `logger.info("Registered {}: {}", enumClass.getSimpleName(), code)`
+
+## Thread Safety Guidelines
+
+### Concurrency Patterns:
+- Use double-checked locking for lazy initialization
+- Synchronize on specific registry maps to allow parallel operations on different enum types
+- Prefer ConcurrentHashMap for thread-safe storage
+- Always synchronize when creating new registry entries to prevent race conditions
+
+### Thread-Safe Operations:
+- `EnumRegistry.register()` - Thread-safe with double-checked locking
+- `EnumRegistry.registerAll()` - Batch registration under single synchronization
+- `EnumRegistry.valueOf()` - Thread-safe read operation
+- `EnumRegistry.values()` - Returns unmodifiable list, thread-safe
+- `EnumRegistry.addEnum()` - Thread-safe dynamic creation with reflection
+
+## Performance Monitoring
+
+### Using EnumPerformanceMonitor:
+- Performance metrics are automatically collected for core operations
+- Access statistics: `EnumPerformanceMonitor.generateReport()`
+- Reset metrics: `EnumPerformanceMonitor.reset()`
+- Average timing available in microseconds for operations
+
+### Performance Best Practices:
+- Use `registerAll()` for batch registration instead of multiple `register()` calls
+- Use `codes()` method when only enum codes are needed (more efficient)
+- Avoid frequent calls to `values()` in tight loops - cache results when possible
+- Monitor performance metrics in production using `EnumPerformanceMonitor`
