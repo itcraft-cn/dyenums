@@ -15,7 +15,30 @@
     <packaging>jar</packaging>
 
     <name>dyenums-loader-file</name>
-    <description>Dynamic Enum Library - File Loader Module</description>
+    <description>
+        Dynamic Enum Library - File Loader Module
+        a dynamic enum library for Java 8+ that provides runtime-extensible enums. Unlike traditional Java enums that are fixed at compile time, dyenums allows you to register, modify, and load enum values at runtime.
+    </description>
+
+    <scm>
+        <connection>scm:git:git://github.com/itcraft-cn/dyenums.git</connection>
+        <developerConnection>scm:git:ssh://github.com/itcraft-cn/dyenums.git</developerConnection>
+        <url>https://github.com/itcraft-cn/dyenums/</url>
+    </scm>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Helly Guo</name>
+            <email>hellyguo@foxmail.com</email>
+        </developer>
+    </developers>
 
     <dependencies>
         <!-- Core Module -->
@@ -31,22 +54,32 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>${plugin.compiler}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${plugin.surefire}</version>
+            </plugin>
+            <!-- source -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>${plugin.source}</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
                         <goals>
-                            <goal>jar</goal>
+                            <goal>jar-no-fork</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
+            <!-- javadoc -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${plugin.javadoc}</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -56,6 +89,32 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- gpg -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>${plugin.gpg}</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- publish -->
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>${plugin.publish}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>maven-sonatype-central</publishingServerId>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
 </project>

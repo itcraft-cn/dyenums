@@ -11,14 +11,25 @@
     <packaging>pom</packaging>
 
     <name>dyenums-parent</name>
-    <description>Dynamic Enum Library for Java - Parent POM</description>
+    <description>
+        Dynamic Enum Library for Java - Parent POM
+        a dynamic enum library for Java 8+ that provides runtime-extensible enums. Unlike traditional Java enums that are fixed at compile time, dyenums allows you to register, modify, and load enum values at runtime.
+    </description>
 
     <properties>
+        <plugin.compiler>3.8.1</plugin.compiler>
+        <plugin.surefire>2.22.2</plugin.surefire>
+        <plugin.source>3.2.1</plugin.source>
+        <plugin.javadoc>3.3.2</plugin.javadoc>
+        <plugin.gpg>1.5</plugin.gpg>
+        <plugin.publish>0.7.0</plugin.publish>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <spring.version>5.3.21</spring.version>
         <slf4j.version>1.7.36</slf4j.version>
+        <h2.version>2.1.214</h2.version>
+        <annotation.version>1.3.2</annotation.version>
+        <spring.version>5.3.21</spring.version>
         <junit.version>4.13.2</junit.version>
     </properties>
 
@@ -53,11 +64,19 @@
                 <version>${spring.version}</version>
             </dependency>
 
+            <!-- Spring Test -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-test</artifactId>
+                <version>${spring.version}</version>
+                <scope>test</scope>
+            </dependency>
+
             <!-- javax.annotation for PostConstruct -->
             <dependency>
                 <groupId>javax.annotation</groupId>
                 <artifactId>javax.annotation-api</artifactId>
-                <version>1.3.2</version>
+                <version>${annotation.version}</version>
             </dependency>
 
             <!-- JUnit for testing -->
@@ -80,7 +99,7 @@
             <dependency>
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>
-                <version>2.1.214</version>
+                <version>${h2.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -93,11 +112,11 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>${plugin.compiler}</version>
                     <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
-                        <encoding>UTF-8</encoding>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
+                        <encoding>${project.build.sourceEncoding}</encoding>
                     </configuration>
                 </plugin>
 
@@ -105,21 +124,21 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.2</version>
+                    <version>${plugin.surefire}</version>
                 </plugin>
 
                 <!-- Source Plugin for generating source JAR -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.2.1</version>
+                    <version>${plugin.source}</version>
                 </plugin>
 
                 <!-- Javadoc Plugin -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.3.2</version>
+                    <version>${plugin.javadoc}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
