@@ -8,7 +8,7 @@
     <parent>
         <groupId>cn.itcraft</groupId>
         <artifactId>dyenums-parent</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version> <!-- managed by updgitver -->
     </parent>
 
     <artifactId>dyenums-spring</artifactId>
