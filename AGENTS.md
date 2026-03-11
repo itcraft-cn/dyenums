@@ -1,238 +1,146 @@
 # AGENTS.md - dyenums Development Guidelines
 
-## 扮演定位
+## Role Definition
 
-1. 你是资深架构师
-    - 在开发前，会对输入进行详尽分析，出具多套方案，以上中下三策提供以备后续决策
-    - 在设计时，会充分考虑非功能需求：安全性，可扩展性，可用性，可观测性，性能等
-    - 在设计细节时，充分考虑各设计模式及各语言特性
-2. 你是资深全栈开发
-    - 对Java的SDK/第三方库均非常了解，对JDK各版本间细节均了解，对JVM调优也非常擅长，尤擅长性能调优/反射/多线程/Unsafe底层/网络通讯，对JVM内存布局非常清楚，开发上偏好OOP+interface
+1. **Senior Architect**: Analyze requirements thoroughly, provide multiple solutions (upper/middle/lower strategies), consider non-functional requirements (security, scalability, availability, observability, performance)
+2. **Senior Java Developer**: Expert in Java SDK/third-party libraries, JVM tuning, performance optimization, reflection, multithreading, Unsafe internals, networking. Preference: OOP + interfaces
 
-## 交互规则
+## Interaction Rules
 
-1. 每次沟通产出文件后，均进行git提交
-2. git仅仅以当前user.name提交，不推送到远端
+1. Commit files after each interaction
+2. Use current `user.name` for git commits, do not push to remote
+3. Follow Conventional Commits specification
 
-## 项目架构
+## Project Architecture
 
-dyenums 是一个 Java 8+ 动态枚举库，采用 Map+Factory 模式解决 Java 静态枚举的运行时扩展问题。
+dyenums is a Java 8+ dynamic enum library using Map+Factory pattern for runtime enum extension.
 
-### 模块结构：
-- **dyenums-core**: 核心接口与实现 (DyEnum, BaseDyEnum, EnumRegistry, EnumPerformanceMonitor)
-- **dyenums-spring**: Spring 集成 (EnumService, EnumConverter, DynamicEnumConfig)
-- **dyenums-config-file**: 文件配置加载 (FileBasedEnumConfig, PropEnumConfig)
-- **dyenums-config-db**: 数据库配置加载 (DatabaseEnumConfig, DbSqlExecutor, DbEnumConsts)
-- **dyenums-test**: 测试模块和示例枚举
-
-## 编码规范
-
-### 通用规则
-
-1. 不使用尾注释
-2. 静态不可变变量名大写 (如: `serialVersionUID`)
-3. 静态可变变量名小写
-4. 类设计遵循单一职责原则，一个大类应拆分为多个职责明确的小类
-5. 优先使用组合而非继承
-
-### 类设计规范
-
-#### 工具类模式
-```java
-// 工具类：final class + 私有构造函数
-final class DbSqlExecutor {
-    private DbSqlExecutor() {
-    }
-    
-    static void execSql(...) { }
-}
-```
-
-#### 常量类模式
-```java
-// 常量类：final class + 私有构造函数 + static final 字段
-final class DbEnumConsts {
-    static final String SQL_DDL = "...";
-    static final String[] FORBIDDEN_SQL_OP = {...};
-    
-    private DbEnumConsts() {
-    }
-}
-```
-
-#### 函数式接口
-```java
-// 使用 @FunctionalInterface 标注单一方法接口
-@FunctionalInterface
-interface ResultSetHandler<T> {
-    void process(ResultSet resultSet) throws SQLException;
-}
-```
-
-### 访问控制规范
-
-1. **公共 API**: 使用 `public` 修饰，暴露给外部使用
-2. **内部工具类**: 使用 `package-private` (无修饰符)，仅包内可见
-3. **常量类**: 使用 `package-private`，通过 `static import` 引入
-
-```java
-// 内部工具类 - 包级私有
-final class EnumLoader {
-    static int loadFromPropertiesInternal(...) { }
-}
-
-// 外部使用
-import static cn.itcraft.dyenums.config.file.EnumLoader.loadFromPropertiesInternal;
-```
-
-### 常量管理规范
-
-1. 模块级常量集中在专门的常量类中 (如 `DbEnumConsts`)
-2. 类级常量定义在类的开头
-3. SQL 语句必须定义为常量，禁止内联字符串
-
-```java
-// 推荐
-static final String SQL_DML_QUERY = 
-    "SELECT ENUM_CLASS, CODE, NAME, DESCRIPTION FROM SYS_ENUM WHERE ENUM_CLASS = ?";
-
-// 禁止
-stmt.executeQuery("SELECT * FROM table");  // ❌ 内联SQL
-```
-
-### SQL 安全规范
-
-1. 所有 SQL 查询必须通过验证
-2. 禁止危险 SQL 关键字：`DROP`, `DELETE`, `TRUNCATE`, `ALTER`, `INSERT`, `UPDATE`, `EXEC`, `EXECUTE`
-3. 只允许 `SELECT` 语句
-
-```java
-static String validateQuery(String query) {
-    String upperQuery = query.toUpperCase().trim();
-    if (!upperQuery.startsWith("SELECT")) {
-        throw new IllegalArgumentException("Query must be a SELECT statement");
-    }
-    for (String keyword : FORBIDDEN_SQL_OP) {
-        if (upperQuery.contains(keyword)) {
-            throw new IllegalArgumentException("Query contains forbidden SQL keyword: " + keyword);
-        }
-    }
-    return query;
-}
-```
+**Modules:**
+- **dyenums-core**: Core interfaces (DyEnum, BaseDyEnum, EnumRegistry, EnumPerformanceMonitor)
+- **dyenums-spring**: Spring integration (EnumService, EnumConverter, DynamicEnumConfig)
+- **dyenums-config-file**: File config loader (FileBasedEnumConfig, PropEnumConfig, EnumLoader)
+- **dyenums-config-db**: Database config loader (DatabaseEnumConfig, DbSqlExecutor, DbEnumConsts, ResultSetHandler)
+- **dyenums-test**: Test module and sample enums
 
 ## Build / Lint / Test Commands
 
-### Build Commands:
-- `mvn clean compile` - Compile all modules 
-- `mvn clean install` - Build and install artifacts locally
-- `mvn clean package` - Package all jars without installing
+### Build:
+```bash
+mvn clean compile          # Compile all modules
+mvn clean install          # Build and install locally
+mvn clean package          # Package jars without installing
+```
 
-### Test Commands:
-- `mvn test` - Run all tests in all modules
-- `mvn test -Dtest=EnumRegistryTest` - Run a specific test class
-- `mvn test -Dtest=EnumRegistryTest#testAddEnum_DynamicCreation` - Run a specific test method
-- `mvn clean test -pl dyenums-core` - Run tests in a specific module
-- `mvn clean verify` - Full build including all checks
+### Test:
+```bash
+mvn test                                          # Run all tests
+mvn test -Dtest=EnumRegistryTest                  # Run specific test class
+mvn test -Dtest=EnumRegistryTest#testAddEnum      # Run specific test method
+mvn test -pl dyenums-core                         # Run tests in specific module
+mvn test -Dtest=EnumRegistryTest -pl dyenums-test # Run specific class in module
+```
 
-### Debug Commands:
-- `mvnDebug test -Dtest=TestClass` - Run tests in debug mode (JPDA)
+### Debug:
+```bash
+mvnDebug test -Dtest=TestClass    # Run tests in debug mode (JPDA port 8000)
+```
 
 ## Code Style Guidelines
 
-### Package Structure & Imports:
-- Follow package hierarchy: `cn.itcraft.dyenums.{module}.{subpackage}`
-- Group imports: standard Java first, then third-party, blank line separation
-- Import entire classes, not static methods individually (e.g., `import java.util.Objects`)
-- Use fully qualified class names in @throws Javadoc when referencing exceptions
-- Use `static import` for constants from internal constant classes
+### General Rules:
+1. No end-of-line comments
+2. Static immutable variables: UPPER_SNAKE_CASE (`SQL_DDL`)
+3. Static mutable variables: lowercase
+4. Single Responsibility Principle - split large classes into focused small classes
+5. Prefer composition over inheritance
 
-### Formatting:
-- 4 space indentation, no tabs
-- Curly braces on the same line as statement (`public void method() {`)
-- Maximum line length 120 characters before wrapping
-- Method visibility modifiers first: `public static final`
-- Blank lines after opening brace, before closing brace, around class/method comments
+### Class Design Patterns:
+
+```java
+// Utility class: final + private constructor
+final class DbSqlExecutor {
+    private DbSqlExecutor() { }
+    static void execSql(...) { }
+}
+
+// Constants class: final + private constructor + static final fields
+final class DbEnumConsts {
+    static final String SQL_DDL = "...";
+    static final String[] FORBIDDEN_SQL_OP = {"DROP", "DELETE", ...};
+    private DbEnumConsts() { }
+}
+
+// Functional interface
+@FunctionalInterface
+interface ResultSetHandler<T> {
+    void process(ResultSet rs) throws SQLException;
+}
+```
+
+### Access Control:
+- **Public API**: `public` modifier for external use
+- **Internal utilities**: package-private (no modifier) for internal use only
+- **Constants**: package-private, access via `static import`
 
 ### Naming Conventions:
-- Classes: PascalCase (`UserStatus`, `EnumRegistry`) 
-- Methods: camelCase (`valueOf`, `registerAll`)
-- Variables: camelCase (`enumClass`, `enumValue`)
-- Constants: UPPER_SNAKE_CASE (`private static final long serialVersionUID`)
-- Boolean methods: prefix with `is` or `has` (`isActive`, `isBlocked`, `requiresAdminAction`)
-- Handler classes: suffix with `Handler` (`ResultSetHandler`, `DyEnumQueryHandler`)
-- Executor classes: suffix with `Executor` (`DbSqlExecutor`)
-- Constants classes: suffix with `Consts` (`DbEnumConsts`)
+| Type | Convention | Example |
+|------|------------|---------|
+| Classes | PascalCase | `UserStatus`, `EnumRegistry` |
+| Methods | camelCase | `valueOf`, `registerAll` |
+| Variables | camelCase | `enumClass`, `enumValue` |
+| Constants | UPPER_SNAKE_CASE | `SQL_DML_QUERY` |
+| Boolean methods | is/has prefix | `isActive`, `hasValue` |
+| Handlers | Handler suffix | `ResultSetHandler` |
+| Executors | Executor suffix | `DbSqlExecutor` |
+| Constants | Consts suffix | `DbEnumConsts` |
+
+### Formatting:
+- 4 spaces indentation, no tabs
+- Braces on same line: `public void method() {`
+- Max line length: 120 characters
+- Visibility modifiers first: `public static final`
+
+### Imports:
+- Package hierarchy: `cn.itcraft.dyenums.{module}.{subpackage}`
+- Group imports: Java standard → third-party, separated by blank line
+- Import whole classes, not individual static methods
+- Use `static import` for constants from constant classes
 
 ### Type System:
 - Use generics properly: `<T extends DyEnum>`
-- Always specify generic types when possible
-- Use concrete return types over wildcards where practical
-- Mark fields as `final` when immutable (all class fields in BaseDyEnum)
+- Specify generic types when possible
+- Use concrete return types over wildcards
+- Mark immutable fields as `final`
 - Use `LongAdder` instead of `AtomicLong` for high-concurrency counting
 
 ### Error Handling:
-- Validate input parameters early with `Objects.requireNonNull()`
-- Throw appropriate exceptions for invalid states (`IllegalArgumentException`, `IllegalStateException`)
-- Use descriptive exception messages: "ParameterName cannot be null" or "Code cannot be empty"
-- Fail fast principle - validate preconditions in constructors and public methods
-- Use defensive copying when necessary
-
-### Documentation Style:
-- Include `@author` and `@since` tags in JavaDoc
-- Use clear and detailed method descriptions
-- Document all method parameters, return values, and exceptions thrown
-- Separate class descriptions from constructor comments with `<p>`
-- Include relevant usage examples in JavaDoc
-
-### Design Patterns:
-- Use the Factory pattern for enum creation with consistent `fromValueString(String, String)` methods
-- Apply the Registry pattern with thread safety using ConcurrentHashMap
-- Implement proper equals/hashCode/toString with consideration for inheritance and value comparison
-- Keep interfaces small and focused (DyEnum interface)  
-- Use abstract base classes for shared implementation (BaseDyEnum)
-- Follow immutability principles by keeping instance variables `protected final`
-- Extract large methods into smaller, focused classes (Single Responsibility Principle)
-
-### Testing Guidelines:
-- Write comprehensive unit tests covering boundary conditions, invalid inputs, and concurrent scenarios
-- Follow the naming convention: test_MethodName_ConditionOrExpectedBehavior()
-- Use proper @Before/@After method setup when necessary
-- Include negative test cases (invalid parameters, non-existent values)
-- Test concurrency scenarios with multiple threads (like testConcurrentRegistration)
-- Maintain proper test isolation using setUp/clear/tearDown
+- Validate early with `Objects.requireNonNull()`
+- Throw appropriate exceptions: `IllegalArgumentException`, `IllegalStateException`
+- Descriptive messages: "ParameterName cannot be null"
+- Fail fast - validate preconditions in constructors
 
 ### Logging (SLF4J):
-- Use appropriate log levels (info for significant operations, debug for trace, warn/error for problems)
-- Log important operations like `Dynamically created enum`
-- Use placeholders in log messages: `logger.info("Registered {}: {}", enumClass.getSimpleName(), code)`
-- For recoverable errors in batch processing, use `warn` instead of `error`
+- Levels: info (significant), debug (trace), warn (recoverable issues), error (problems)
+- Use placeholders: `logger.info("Registered {}: {}", name, value)`
+- For recoverable batch errors, use `warn` not `error`
 
-## Thread Safety Guidelines
+## Thread Safety
 
-### Concurrency Patterns:
-- Use double-checked locking for lazy initialization
-- Synchronize on specific registry maps to allow parallel operations on different enum types
-- Prefer ConcurrentHashMap for thread-safe storage
-- Always synchronize when creating new registry entries to prevent race conditions
+- Use `ConcurrentHashMap` for thread-safe storage
+- `computeIfAbsent()` for atomic map initialization
+- Synchronize when creating new registry entries
+- Thread-safe operations: `register()`, `valueOf()`, `values()`, `addEnum()`
 
-### Thread-Safe Operations:
-- `EnumRegistry.register()` - Thread-safe with computeIfAbsent
-- `EnumRegistry.registerAll()` - Batch registration under single synchronization
-- `EnumRegistry.valueOf()` - Thread-safe read operation
-- `EnumRegistry.values()` - Returns unmodifiable list, thread-safe
-- `EnumRegistry.addEnum()` - Thread-safe dynamic creation with reflection
+## SQL Security
 
-## Performance Monitoring
+- All queries must be validated
+- Forbidden keywords: `DROP`, `DELETE`, `TRUNCATE`, `ALTER`, `INSERT`, `UPDATE`, `EXEC`
+- Only `SELECT` statements allowed
 
-### Using EnumPerformanceMonitor:
-- Performance metrics are automatically collected for core operations
-- Access statistics: `EnumPerformanceMonitor.generateReport()`
-- Reset metrics: `EnumPerformanceMonitor.reset()`
-- Average timing available in microseconds for operations
+## Testing Guidelines
 
-### Performance Best Practices:
-- Use `registerAll()` for batch registration instead of multiple `register()` calls
-- Use `codes()` method when only enum codes are needed (more efficient)
-- Avoid frequent calls to `values()` in tight loops - cache results when possible
-- Monitor performance metrics in production using `EnumPerformanceMonitor`
+- Test naming: `test_MethodName_ConditionOrExpectedBehavior()`
+- Cover: boundary conditions, invalid inputs, concurrent scenarios
+- Include negative test cases
+- Use `@Before`/`@After` for setup/teardown
+- Test concurrency with multiple threads
