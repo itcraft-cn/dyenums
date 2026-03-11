@@ -3,17 +3,24 @@ package cn.itcraft.dyenums;
 import cn.itcraft.dyenums.core.BaseDyEnumTest;
 import cn.itcraft.dyenums.core.EnumRegistryTest;
 import cn.itcraft.dyenums.integration.EnumIntegrationTest;
+import cn.itcraft.dyenums.loader.db.DatabaseDyEnumsLoaderTest;
+import cn.itcraft.dyenums.loader.file.FileBasedDyEnumsLoaderTest;
+import cn.itcraft.dyenums.loader.file.PropDyEnumsLoaderTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 /**
- * @author Helly Guo
- * <p>
- * Created on 2026-03-11 14:10
+ * Test suite for all dyenums tests.
+ *
+ * @author Helly
+ * @since 1.0.0
  */
 @Suite.SuiteClasses({
         BaseDyEnumTest.class,
         EnumRegistryTest.class,
+        FileBasedDyEnumsLoaderTest.class,
+        PropDyEnumsLoaderTest.class,
+        DatabaseDyEnumsLoaderTest.class,
         EnumIntegrationTest.class
 })
 @RunWith(Suite.class)

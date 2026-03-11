@@ -19,10 +19,10 @@ dyenums is a Java 8+ dynamic enum library using Map+Factory pattern for runtime 
 
 **Modules:**
 
-- **dyenums-core**: Core interfaces (DyEnum, BaseDyEnum, EnumRegistry, EnumPerformanceMonitor)
+- **dyenums-core**: Core interfaces (DyEnum, BaseDyEnum, EnumRegistry, EnumPerformanceMonitor, DyEnumsLoader)
 - **dyenums-spring**: Spring integration (EnumService, EnumConverter, DynamicEnumConfig)
-- **dyenums-config-file**: File config loader (FileBasedEnumConfig, PropEnumConfig, EnumLoader)
-- **dyenums-config-db**: Database config loader (DatabaseEnumConfig, DbSqlExecutor, DbEnumConsts, ResultSetHandler)
+- **dyenums-loader-file**: File config loader (FileBasedDyEnumsLoader, PropDyEnumsLoader, SingleLineEnumDefineParser)
+- **dyenums-loader-db**: Database config loader (DatabaseDyEnumsLoader, DbSqlExecutor, DbEnumConsts, ResultSetHandler, DyEnumQueryHandler)
 - **dyenums-test**: Test module and sample enums
 
 ## Build / Lint / Test Commands

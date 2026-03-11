@@ -101,16 +101,21 @@ public class FileBasedDyEnumsLoader<T extends DyEnum> implements DyEnumsLoader<T
 
     @Override
     public boolean validateSource() {
+        // Try classpath first (consistent with loadPropertiesFromFile)
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(filePath)) {
+            if (is != null) {
+                return true;
+            }
+        } catch (Exception e) {
+            // Ignore and try filesystem
+        }
+        
+        // Try filesystem
         try {
             Path path = Paths.get(filePath);
             return Files.exists(path) && Files.isReadable(path);
         } catch (Exception e) {
-            // Try classpath
-            try (InputStream is = getClass().getClassLoader().getResourceAsStream(filePath)) {
-                return is != null;
-            } catch (Exception ex) {
-                return false;
-            }
+            return false;
         }
     }
 
