@@ -1,6 +1,7 @@
 package cn.itcraft.dyenums.core;
 
 import cn.itcraft.dyenums.annotation.EnumDefinition;
+import cn.itcraft.dyenums.monitor.EnumPerformanceMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
