@@ -6,6 +6,7 @@ import cn.itcraft.dyenums.integration.EnumIntegrationTest;
 import cn.itcraft.dyenums.loader.db.DatabaseDyEnumsLoaderTest;
 import cn.itcraft.dyenums.loader.file.FileBasedDyEnumsLoaderTest;
 import cn.itcraft.dyenums.loader.file.PropDyEnumsLoaderTest;
+import cn.itcraft.dyenums.spring.SpringIntegrationTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -21,6 +22,7 @@ import org.junit.runners.Suite;
         FileBasedDyEnumsLoaderTest.class,
         PropDyEnumsLoaderTest.class,
         DatabaseDyEnumsLoaderTest.class,
+        SpringIntegrationTest.class,
         EnumIntegrationTest.class
 })
 @RunWith(Suite.class)

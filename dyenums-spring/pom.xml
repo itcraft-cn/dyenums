@@ -29,14 +29,14 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <optional>true</optional>
+            <version>5.3.21</version>
         </dependency>
 
         <!-- Spring Web -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <optional>true</optional>
+            <version>5.3.21</version>
         </dependency>
 
         <!-- javax.annotation for PostConstruct -->
