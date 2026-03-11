@@ -2,6 +2,7 @@ package cn.itcraft.dyenums.sample;
 
 import cn.itcraft.dyenums.annotation.EnumDefinition;
 import cn.itcraft.dyenums.core.EnumRegistry;
+import cn.itcraft.dyenums.core.MultiLangDyEnum;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,59 +25,49 @@ import java.util.Objects;
         configSource = "file",
         description = "Multi-language error code enum"
 )
-public class ErrorCode extends MultiLanguageDyEnum {
+public class ErrorCode extends MultiLangDyEnum {
 
-    private static final long serialVersionUID = 1L;
-
-public static final ErrorCode ERR_00001 = new ErrorCode(
+    public static final ErrorCode ERR_00001 = new ErrorCode(
             "err_00001", "系统错误", 1,
             createMessages("系统内部错误", "System error", "Erro do sistema", "Системная ошибка")
     );
-
     public static final ErrorCode ERR_00002 = new ErrorCode(
             "err_00002", "参数错误", 2,
             createMessages("参数验证失败", "Invalid parameter", "Parâmetro inválido", "Неверный параметр")
     );
-
     public static final ErrorCode ERR_00003 = new ErrorCode(
             "err_00003", "权限错误", 3,
             createMessages("无访问权限", "Access denied", "Acesso negado", "Доступ запрещен")
     );
-
     public static final ErrorCode ERR_00004 = new ErrorCode(
             "err_00004", "认证错误", 4,
             createMessages("认证失败", "Authentication failed", "Falha na autenticação", "Ошибка аутентификации")
     );
-
     public static final ErrorCode ERR_00005 = new ErrorCode(
             "err_00005", "数据错误", 5,
             createMessages("数据不存在", "Data not found", "Dados não encontrados", "Данные не найдены")
     );
-
     public static final ErrorCode ERR_00006 = new ErrorCode(
             "err_00006", "网络错误", 6,
             createMessages("网络连接失败", "Network error", "Erro de rede", "Ошибка сети")
     );
-
     public static final ErrorCode ERR_00007 = new ErrorCode(
             "err_00007", "超时错误", 7,
             createMessages("请求超时", "Request timeout", "Tempo limite esgotado", "Тайм-аут запроса")
     );
-
     public static final ErrorCode ERR_00008 = new ErrorCode(
             "err_00008", "限流错误", 8,
             createMessages("请求过于频繁", "Rate limit exceeded", "Limite de taxa excedido", "Превышен лимит запросов")
     );
-
     public static final ErrorCode ERR_00009 = new ErrorCode(
             "err_00009", "服务错误", 9,
             createMessages("服务不可用", "Service unavailable", "Serviço indisponível", "Сервис недоступен")
     );
-
     public static final ErrorCode ERR_00010 = new ErrorCode(
             "err_00010", "未知错误", 10,
             createMessages("未知错误", "Unknown error", "Erro desconhecido", "Неизвестная ошибка")
     );
+    private static final long serialVersionUID = 173298272982320928L;
 
     private ErrorCode(String code, String name, int order, Map<String, String> messages) {
         super(code, name, order, messages);

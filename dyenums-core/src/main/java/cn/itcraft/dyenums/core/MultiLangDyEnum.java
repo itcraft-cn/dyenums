@@ -1,12 +1,9 @@
-package cn.itcraft.dyenums.sample;
-
-import cn.itcraft.dyenums.core.BaseDyEnum;
+package cn.itcraft.dyenums.core;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -17,21 +14,21 @@ import java.util.Set;
  * @author Helly
  * @since 1.0.0
  */
-public abstract class MultiLanguageDyEnum extends BaseDyEnum {
+public abstract class MultiLangDyEnum extends BaseDyEnum {
 
     private static final long serialVersionUID = 1L;
 
     protected final Map<String, String> messages;
 
     /**
-     * Constructs a new MultiLanguageDyEnum instance.
+     * Constructs a new MultiLangDyEnum instance.
      *
      * @param code     the unique code for this enum value
      * @param name     the display name for this enum value
      * @param order    the order/sort index for this enum value
      * @param messages map of locale code to message (e.g., "zh" -> "系统错误")
      */
-    protected MultiLanguageDyEnum(String code, String name, int order, Map<String, String> messages) {
+    protected MultiLangDyEnum(String code, String name, int order, Map<String, String> messages) {
         super(code, name, null, order);
         this.messages = messages != null ? new HashMap<>(messages) : new HashMap<>();
     }
