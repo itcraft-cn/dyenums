@@ -1,44 +1,44 @@
-# dyenums - Dynamic Enum Library for Java
+# dyenums - Java 动态枚举库
 
 [![Java](https://img.shields.io/badge/Java-8+-blue.svg)](https://www.oracle.com/java/)
 [![Maven](https://img.shields.io/badge/Maven-3.6+-green.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-lightgrey.svg)](https://opensource.org/licenses/Apache-2.0)
 
-**dyenums** is a dynamic enum library for Java 8+ that provides runtime-extensible enums. Unlike traditional Java enums that are fixed at compile time, dyenums allows you to register, modify, and load enum values at runtime.
+**dyenums** 是一个支持 Java 8+ 的动态枚举库。与编译期固定的传统 Java 枚举不同，dyenums 允许你在运行时注册、修改和加载枚举值。
 
-## Key Features
+## 核心特性
 
-- **Runtime Registration**: Register enum values dynamically at runtime
-- **Configuration Loading**: Load enums from properties files or databases (optional)
-- **Custom Loaders**: Implement `DyEnumsLoader` interface for any data source
-- **Type-Safe Access**: Full type safety with generics
-- **Thread-Safe**: Built with `ConcurrentHashMap` and proper synchronization
-- **Minimal Core**: Only SLF4J dependency required for core module
-- **Spring Integration**: Optional Spring/Boot support
+- **运行时注册**：在运行时动态注册枚举值
+- **配置加载**：从属性文件或数据库加载枚举（可选）
+- **自定义加载器**：实现 `DyEnumsLoader` 接口支持任意数据源
+- **类型安全**：使用泛型确保编译期类型检查
+- **线程安全**：基于 `ConcurrentHashMap` 和同步机制实现
+- **最小核心**：核心模块仅依赖 SLF4J
+- **Spring 集成**：可选的 Spring/Boot 支持
 
-## Module Structure
+## 模块结构
 
 ```
 dyenums
-├── dyenums-core        # Core module (required) - minimal dependencies
-├── dyenums-loader-file # File loader (optional) - properties file support
-├── dyenums-loader-db   # Database loader (optional) - JDBC support
-└── dyenums-spring      # Spring integration (optional) - auto-configuration
+├── dyenums-core        # 核心模块（必需）- 最小依赖
+├── dyenums-loader-file # 文件加载器（可选）- 属性文件支持
+├── dyenums-loader-db   # 数据库加载器（可选）- JDBC 支持
+└── dyenums-spring      # Spring 集成（可选）- 自动配置
 ```
 
-| Use Case | Required Modules |
-|----------|-----------------|
-| Manual registration only | `dyenums-core` |
-| Custom loader implementation | `dyenums-core` |
-| Load from properties files | `dyenums-core` + `dyenums-loader-file` |
-| Load from database | `dyenums-core` + `dyenums-loader-db` |
-| Spring/Boot integration | `dyenums-core` + `dyenums-spring` |
+| 使用场景 | 需要的模块 |
+|----------|-----------|
+| 手动注册 | `dyenums-core` |
+| 自定义加载器 | `dyenums-core` |
+| 从属性文件加载 | `dyenums-core` + `dyenums-loader-file` |
+| 从数据库加载 | `dyenums-core` + `dyenums-loader-db` |
+| Spring/Boot 集成 | `dyenums-core` + `dyenums-spring` |
 
-## Installation
+## 安装
 
 ### Maven
 
-**Core only (minimal dependencies)**:
+**仅核心模块（最小依赖）**：
 
 ```xml
 <dependency>
@@ -48,7 +48,7 @@ dyenums
 </dependency>
 ```
 
-**With file loader**:
+**添加文件加载器**：
 
 ```xml
 <dependency>
@@ -58,7 +58,7 @@ dyenums
 </dependency>
 ```
 
-**With database loader**:
+**添加数据库加载器**：
 
 ```xml
 <dependency>
@@ -68,7 +68,7 @@ dyenums
 </dependency>
 ```
 
-**With Spring integration**:
+**添加 Spring 集成**：
 
 ```xml
 <dependency>
@@ -78,7 +78,7 @@ dyenums
 </dependency>
 ```
 
-### Build from Source
+### 从源码构建
 
 ```bash
 git clone https://github.com/itcraft-cn/dyenums.git
@@ -86,20 +86,20 @@ cd dyenums
 mvn clean install
 ```
 
-## Quick Start
+## 快速开始
 
-### 1. Define Your Enum Class
+### 1. 定义枚举类
 
-Extend `BaseDyEnum`:
+继承 `BaseDyEnum`：
 
 ```java
 import cn.itcraft.dyenums.core.BaseDyEnum;
 
 public class UserStatus extends BaseDyEnum {
     
-    public static final UserStatus ACTIVE = new UserStatus("ACTIVE", "Active", "User is active", 1);
-    public static final UserStatus INACTIVE = new UserStatus("INACTIVE", "Inactive", "User is inactive", 2);
-    public static final UserStatus LOCKED = new UserStatus("LOCKED", "Locked", "User is locked", 3);
+    public static final UserStatus ACTIVE = new UserStatus("ACTIVE", "激活", "用户已激活", 1);
+    public static final UserStatus INACTIVE = new UserStatus("INACTIVE", "未激活", "用户未激活", 2);
+    public static final UserStatus LOCKED = new UserStatus("LOCKED", "锁定", "用户被锁定", 3);
     
     private UserStatus(String code, String name, String description, int order) {
         super(code, name, description, order);
@@ -107,43 +107,43 @@ public class UserStatus extends BaseDyEnum {
 }
 ```
 
-### 2. Register and Use
+### 2. 注册和使用
 
 ```java
 import cn.itcraft.dyenums.core.EnumRegistry;
 
 public class Application {
     public static void main(String[] args) {
-        // Register predefined values
+        // 注册预定义值
         EnumRegistry.register(UserStatus.class, UserStatus.ACTIVE);
         EnumRegistry.register(UserStatus.class, UserStatus.INACTIVE);
         EnumRegistry.register(UserStatus.class, UserStatus.LOCKED);
         
-        // Lookup by code
+        // 按 code 查询
         UserStatus status = EnumRegistry.valueOf(UserStatus.class, "ACTIVE")
-            .orElseThrow(() -> new IllegalArgumentException("Status not found"));
+            .orElseThrow(() -> new IllegalArgumentException("状态不存在"));
         
-        System.out.println(status.getName()); // Output: Active
+        System.out.println(status.getName()); // 输出: 激活
     }
 }
 ```
 
-## Advanced Usage
+## 高级用法
 
-### Dynamic Registration
+### 动态注册
 
 ```java
-// Create and register at runtime
-UserStatus customStatus = new UserStatus("CUSTOM", "Custom Status", "Custom status", 99);
+// 运行时创建并注册
+UserStatus customStatus = new UserStatus("CUSTOM", "自定义状态", "自定义状态", 99);
 EnumRegistry.register(UserStatus.class, customStatus);
 
-// Or use EnumRegistry.addEnum with reflection
-EnumRegistry.addEnum(UserStatus.class, "VIP", "VIP User", "VIP status", 100);
+// 或使用反射通过 EnumRegistry.addEnum
+EnumRegistry.addEnum(UserStatus.class, "VIP", "VIP用户", "VIP状态", 100);
 ```
 
-### Custom Loader
+### 自定义加载器
 
-Implement `DyEnumsLoader` interface to load enums from any source:
+实现 `DyEnumsLoader` 接口从任意数据源加载：
 
 ```java
 import cn.itcraft.dyenums.loader.DyEnumsLoader;
@@ -154,7 +154,7 @@ public class MyCustomLoader<T extends DyEnum> implements DyEnumsLoader<T> {
     
     @Override
     public int load(Class<T> enumClass, BiFunction<String, String, T> factory) throws Exception {
-        // Load from your data source (REST API, Redis, etc.)
+        // 从你的数据源加载（REST API、Redis 等）
         List<MyData> dataList = fetchFromMySource();
         
         int count = 0;
@@ -175,9 +175,9 @@ public class MyCustomLoader<T extends DyEnum> implements DyEnumsLoader<T> {
 }
 ```
 
-### Multi-Language Support
+### 多语言支持
 
-Extend with language-aware messages:
+扩展支持多语言消息：
 
 ```java
 import cn.itcraft.dyenums.core.BaseDyEnum;
@@ -202,33 +202,33 @@ public class ErrorCode extends BaseDyEnum {
         return getMessage(locale.getLanguage());
     }
     
-    // Convenience methods
+    // 便捷方法
     public String getMessageZh() { return getMessage("zh"); }
     public String getMessageEn() { return getMessage("en"); }
 }
 
-// Usage
+// 使用示例
 Map<String, String> messages = new HashMap<>();
 messages.put("zh", "系统错误");
 messages.put("en", "System error");
 messages.put("pt", "Erro do sistema");
 messages.put("ru", "Системная ошибка");
 
-ErrorCode error = new ErrorCode("SYS_001", "System Error", 1, messages);
+ErrorCode error = new ErrorCode("SYS_001", "系统错误", 1, messages);
 EnumRegistry.register(ErrorCode.class, error);
 
 System.out.println(error.getMessageZh()); // 系统错误
 System.out.println(error.getMessageEn()); // System error
 ```
 
-### Load from Properties File
+### 从属性文件加载
 
-Use `dyenums-loader-file` module:
+使用 `dyenums-loader-file` 模块：
 
 ```properties
 # enums.properties
-UserStatus.ACTIVE=ACTIVE|Active|User is active|1
-UserStatus.INACTIVE=INACTIVE|Inactive|User is inactive|2
+UserStatus.ACTIVE=ACTIVE|激活|用户已激活|1
+UserStatus.INACTIVE=INACTIVE|未激活|用户未激活|2
 ```
 
 ```java
@@ -238,9 +238,9 @@ FileBasedDyEnumsLoader<UserStatus> loader = new FileBasedDyEnumsLoader<>("enums.
 loader.load(UserStatus.class, UserStatus::fromValueString);
 ```
 
-### Load from Database
+### 从数据库加载
 
-Use `dyenums-loader-db` module:
+使用 `dyenums-loader-db` 模块：
 
 ```java
 import cn.itcraft.dyenums.loader.db.DatabaseDyEnumsLoader;
@@ -250,9 +250,9 @@ DatabaseDyEnumsLoader<UserStatus> loader = new DatabaseDyEnumsLoader<>(dataSourc
 loader.load(UserStatus.class, UserStatus::fromValueString);
 ```
 
-### Spring Integration
+### Spring 集成
 
-Use `dyenums-spring` module:
+使用 `dyenums-spring` 模块：
 
 ```java
 import cn.itcraft.dyenums.spring.EnumService;
@@ -274,64 +274,64 @@ public class UserService {
 }
 ```
 
-## Architecture
+## 架构设计
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      Application Layer                       │
+│                        应用层                                 │
 ├─────────────────────────────────────────────────────────────┤
-│  EnumRegistry (Core) - Registration, Lookup, Thread-Safety  │
+│  EnumRegistry (Core) - 注册、查询、线程安全                   │
 ├──────────────┬──────────────┬──────────────┬────────────────┤
 │  BaseDyEnum  │ DyEnumsLoader│ @EnumDef     │ Spring Config  │
-│  (Core)      │ (Core Interface)            │ (Optional)     │
+│  (Core)      │ (Core 接口)   │              │ (可选)          │
 ├──────────────┴──────────────┴──────────────┴────────────────┤
-│              Optional Loader Implementations                  │
+│                    可选加载器实现                              │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────┐│
-│  │ File Loader │ │  DB Loader  │ │  Custom Implementation  ││
-│  │ (Optional)  │ │  (Optional) │ │  (Your Own)             ││
+│  │ 文件加载器   │ │ 数据库加载器 │ │  自定义实现              ││
+│  │ (可选)       │ │ (可选)       │ │  (自行实现)              ││
 │  └─────────────┘ └─────────────┘ └─────────────────────────┘│
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Core Components
+### 核心组件
 
-| Component | Module | Description |
-|-----------|--------|-------------|
-| `DyEnum` | core | Interface defining enum contract |
-| `BaseDyEnum` | core | Abstract base implementation |
-| `EnumRegistry` | core | Central registry for all enum instances |
-| `DyEnumsLoader` | core | Interface for custom loaders |
-| `FileBasedDyEnumsLoader` | loader-file | Properties file loader |
-| `PropDyEnumsLoader` | loader-file | In-memory Properties loader |
-| `DatabaseDyEnumsLoader` | loader-db | JDBC database loader |
-| `EnumService` | spring | Spring service for enum access |
-| `EnumConverter` | spring | Spring MVC type converter |
+| 组件 | 模块 | 说明 |
+|------|------|------|
+| `DyEnum` | core | 枚举接口定义 |
+| `BaseDyEnum` | core | 抽象基类实现 |
+| `EnumRegistry` | core | 枚举实例中央注册表 |
+| `DyEnumsLoader` | core | 自定义加载器接口 |
+| `FileBasedDyEnumsLoader` | loader-file | 属性文件加载器 |
+| `PropDyEnumsLoader` | loader-file | 内存 Properties 加载器 |
+| `DatabaseDyEnumsLoader` | loader-db | JDBC 数据库加载器 |
+| `EnumService` | spring | Spring 枚举访问服务 |
+| `EnumConverter` | spring | Spring MVC 类型转换器 |
 
-## Testing
+## 测试
 
 ```bash
-# Run all tests
+# 运行所有测试
 mvn test
 
-# Run specific module tests
+# 运行特定模块测试
 mvn test -pl dyenums-core
 mvn test -pl dyenums-loader-file
 
-# Run specific test class
+# 运行特定测试类
 mvn test -Dtest=EnumRegistryTest
 ```
 
-## Thread Safety
+## 线程安全
 
-All registry operations are thread-safe:
+所有注册表操作都是线程安全的：
 
 ```java
-// Safe for concurrent access
+// 支持并发访问
 ExecutorService executor = Executors.newFixedThreadPool(10);
 for (int i = 0; i < 100; i++) {
     final int id = i;
     executor.submit(() -> {
-        EnumRegistry.addEnum(UserStatus.class, "STATUS_" + id, "Status " + id, null, id);
+        EnumRegistry.addEnum(UserStatus.class, "STATUS_" + id, "状态 " + id, null, id);
     });
 }
 executor.shutdown();
@@ -340,35 +340,35 @@ executor.awaitTermination(1, TimeUnit.MINUTES);
 assertEquals(100, EnumRegistry.getCount(UserStatus.class));
 ```
 
-## Performance
+## 性能特性
 
-- **O(1) Lookup**: HashMap-based lookup by code
-- **Concurrent Access**: `ConcurrentHashMap` for thread-safe operations
-- **Lazy Initialization**: Enums created only when registered
-- **Memory Efficient**: Single shared registry instance
+- **O(1) 查询**：基于 HashMap 的 code 查询
+- **并发访问**：`ConcurrentHashMap` 保证线程安全
+- **惰性初始化**：枚举仅在注册时创建
+- **内存高效**：共享单一注册表实例
 
-## Best Practices
+## 最佳实践
 
-1. Register enums during application startup
-2. Treat enum instances as immutable after creation
-3. Ensure codes are unique within each enum type
-4. Implement `DyEnumsLoader` for custom data sources
-5. Use `EnumService` in Spring applications
+1. 在应用启动时注册枚举
+2. 枚举实例创建后视为不可变
+3. 确保 code 在同一枚举类型内唯一
+4. 为自定义数据源实现 `DyEnumsLoader`
+5. Spring 应用中使用 `EnumService`
 
-## Contributing
+## 贡献
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'feat: add AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. Fork 本仓库
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'feat: add AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 创建 Pull Request
 
-## License
+## 许可证
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+本项目基于 Apache License 2.0 许可 - 详见 [LICENSE](LICENSE) 文件。
 
-## Support
+## 支持
 
-- Create an issue on GitHub
-- Check the `doc` directory for documentation
-- Review example implementations in `dyenums-test` module
+- 在 GitHub 创建 Issue
+- 查看 `doc` 目录中的文档
+- 参考 `dyenums-test` 模块中的示例实现
