@@ -18,7 +18,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 /**
  * Central registry for dynamic enum values.
@@ -45,38 +44,15 @@ public class EnumRegistry {
      * Cache for Constructor objects to avoid repeated reflection overhead.
      * Key: enum class, Value: cached constructor
      */
-    private static final ConcurrentHashMap<Class<?>, Constructor<?>> CONSTRUCTOR_CACHE = 
-        new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Class<?>, Constructor<?>> CONSTRUCTOR_CACHE =
+            new ConcurrentHashMap<>();
 
     /**
      * Cache for sorted values lists to improve performance of frequent queries.
      * Key: enum class, Value: cached sorted list
      */
-    private static final ConcurrentHashMap<Class<?>, List<? extends DyEnum>> VALUES_CACHE = 
-        new ConcurrentHashMap<>();
-
-    /**
-     * Security validation: ensures only annotated classes can be dynamically created.
-     *
-     * @param enumClass the class to validate
-     * @throws SecurityException if the class is not allowed for dynamic creation
-     */
-    private static <T extends DyEnum> void validateEnumClassForDynamicCreation(Class<T> enumClass) {
-        if (!enumClass.isAnnotationPresent(EnumDefinition.class)) {
-            throw new SecurityException(
-                "Only classes annotated with @EnumDefinition can be dynamically created: " 
-                + enumClass.getName());
-        }
-    }
-
-    /**
-     * Invalidates cache for a specific enum class.
-     *
-     * @param enumClass the enum class whose cache should be invalidated
-     */
-    private static void invalidateCache(Class<?> enumClass) {
-        VALUES_CACHE.remove(enumClass);
-    }
+    private static final ConcurrentHashMap<Class<?>, List<? extends DyEnum>> VALUES_CACHE =
+            new ConcurrentHashMap<>();
 
     /**
      * Static initializer to register default enum values.
@@ -92,6 +68,29 @@ public class EnumRegistry {
      */
     private EnumRegistry() {
         throw new UnsupportedOperationException("Utility class should not be instantiated");
+    }
+
+    /**
+     * Security validation: ensures only annotated classes can be dynamically created.
+     *
+     * @param enumClass the class to validate
+     * @throws SecurityException if the class is not allowed for dynamic creation
+     */
+    private static <T extends DyEnum> void validateEnumClassForDynamicCreation(Class<T> enumClass) {
+        if (!enumClass.isAnnotationPresent(EnumDefinition.class)) {
+            throw new SecurityException(
+                    "Only classes annotated with @EnumDefinition can be dynamically created: "
+                            + enumClass.getName());
+        }
+    }
+
+    /**
+     * Invalidates cache for a specific enum class.
+     *
+     * @param enumClass the enum class whose cache should be invalidated
+     */
+    private static void invalidateCache(Class<?> enumClass) {
+        VALUES_CACHE.remove(enumClass);
     }
 
     /**
@@ -120,8 +119,8 @@ public class EnumRegistry {
 
         // Use computeIfAbsent for atomic registry creation
         Map<String, DyEnum> classRegistry = REGISTRIES.computeIfAbsent(
-            enumClass, k -> new ConcurrentHashMap<>()
-        );
+                enumClass, k -> new ConcurrentHashMap<>()
+                                                                      );
 
         // ConcurrentHashMap.put() is thread-safe, no synchronization needed
         String code = enumValue.getCode();
@@ -134,7 +133,7 @@ public class EnumRegistry {
 
         // Invalidate cache
         invalidateCache(enumClass);
-        
+
         // Record performance metric
         EnumPerformanceMonitor.recordRegister(startTime, enumClass);
     }
@@ -157,8 +156,8 @@ public class EnumRegistry {
 
         // Use computeIfAbsent for atomic registry creation
         Map<String, DyEnum> classRegistry = REGISTRIES.computeIfAbsent(
-            enumClass, k -> new ConcurrentHashMap<>()
-        );
+                enumClass, k -> new ConcurrentHashMap<>()
+                                                                      );
 
         // Batch registration without synchronization
         int count = 0;
@@ -199,27 +198,28 @@ public class EnumRegistry {
         for (Map.Entry<Object, Object> entry : config.entrySet()) {
             Object keyObj = entry.getKey();
             Object valueObj = entry.getValue();
-            
+
             if (keyObj == null || valueObj == null) {
                 LOGGER.warn("Skipping null key or value in config for enum: {}", enumClass.getSimpleName());
                 continue;
             }
-            
+
             String fullKey = keyObj.toString();
             String valueStr = valueObj.toString();
-            
+
             if (fullKey.trim().isEmpty() || valueStr.trim().isEmpty()) {
                 LOGGER.warn("Skipping empty key or value in config: {}", fullKey);
                 continue;
             }
-            
+
             String[] parts = fullKey.split("\\.", 2); // Limit to 2 splits for efficiency
 
             // Check if this property belongs to our enum class
             if (parts.length == 2 && parts[0].equals(enumClass.getSimpleName())) {
                 String code = parts[1];
                 if (code.trim().isEmpty()) {
-                    LOGGER.warn("Invalid configuration key format: '{}' for enum '{}'", fullKey, enumClass.getSimpleName());
+                    LOGGER.warn("Invalid configuration key format: '{}' for enum '{}'", fullKey,
+                                enumClass.getSimpleName());
                     continue;
                 }
 
@@ -230,16 +230,16 @@ public class EnumRegistry {
                         // Call factory with the code and the value string
                         T enumValue = factory.apply(code, valueStr);
                         register(enumClass, enumValue);
-                        LOGGER.info("Successfully loaded enum from config: {}.{}", 
-                                   enumClass.getSimpleName(), code);
+                        LOGGER.info("Successfully loaded enum from config: {}.{}",
+                                    enumClass.getSimpleName(), code);
                     } catch (Exception e) {
                         // Don't log full valueStr to avoid potential sensitive info leakage
-                        LOGGER.error("Failed to create enum from config: {}.{}, error: {}", 
+                        LOGGER.warn("Failed to create enum from config: {}.{}, error: {}",
                                     enumClass.getSimpleName(), code, e.getMessage());
                     }
                 } else {
-                    LOGGER.warn("Invalid config format for {}.{}, expected: 'name|description|order'", 
-                               enumClass.getSimpleName(), code);
+                    LOGGER.warn("Invalid config format for {}.{}, expected: 'name|description|order'",
+                                enumClass.getSimpleName(), code);
                 }
             }
         }
@@ -272,7 +272,7 @@ public class EnumRegistry {
 
         @SuppressWarnings("unchecked")
         T result = (T) classRegistry.get(code);
-        
+
         // Record performance metric
         EnumPerformanceMonitor.recordValueOf(startTime, enumClass);
         return Optional.ofNullable(result);
@@ -312,7 +312,7 @@ public class EnumRegistry {
             T typedValue = (T) value;
             result.add(typedValue);
         }
-        
+
         // Sort by order once all items collected
         result.sort(Comparator.comparingInt(DyEnum::getOrder));
 
@@ -388,21 +388,21 @@ public class EnumRegistry {
             // Use cached constructor for better performance
             @SuppressWarnings("unchecked")
             Constructor<T> constructor = (Constructor<T>) CONSTRUCTOR_CACHE.get(enumClass);
-            
+
             if (constructor == null) {
                 constructor = enumClass.getDeclaredConstructor(
                         String.class, String.class, String.class, int.class
-                );
+                                                              );
                 constructor.setAccessible(true);
                 CONSTRUCTOR_CACHE.put(enumClass, constructor);
             }
 
-            T newEnum = constructor.newInstance(code.trim(), name.trim(), 
-                                              description != null ? description.trim() : "", order);
+            T newEnum = constructor.newInstance(code.trim(), name.trim(),
+                                                description != null ? description.trim() : "", order);
             register(enumClass, newEnum);
 
             LOGGER.info("Dynamically created enum: {}.{}", enumClass.getSimpleName(), code);
-            
+
             // Record performance metric
             EnumPerformanceMonitor.recordAddEnum(startTime, enumClass);
             return newEnum;
@@ -451,7 +451,7 @@ public class EnumRegistry {
             LOGGER.info("Removed enum: {}.{}", enumClass.getSimpleName(), code);
             invalidateCache(enumClass);
         }
-        
+
         // Record performance metric
         EnumPerformanceMonitor.recordRemove(startTime, enumClass);
         return removed != null;
@@ -465,7 +465,7 @@ public class EnumRegistry {
         REGISTRIES.clear();
         VALUES_CACHE.clear();
         CONSTRUCTOR_CACHE.clear();
-        LOGGER.warn("Cleared entire enum registry and caches");
+        LOGGER.info("Cleared entire enum registry and caches");
     }
 
     /**
@@ -491,7 +491,7 @@ public class EnumRegistry {
         Map<String, DyEnum> classRegistry = REGISTRIES.get(enumClass);
         return classRegistry != null ? classRegistry.size() : 0;
     }
-    
+
     /**
      * Gets all enum codes for a class, sorted by order.
      * Provides better performance when only codes are needed.
