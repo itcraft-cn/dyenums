@@ -1,7 +1,6 @@
 package cn.itcraft.dyenums.sample;
 
 import cn.itcraft.dyenums.core.EnumRegistry;
-import cn.itcraft.dyenums.loader.file.FileBasedDyEnumsLoader;
 import cn.itcraft.dyenums.loader.file.PropDyEnumsLoader;
 
 import java.io.IOException;
@@ -108,7 +107,7 @@ public class ErrorCodeDemo {
                 "自定义错误",
                 999,
                 messages
-        );
+                                                );
         EnumRegistry.register(ErrorCode.class, customError);
 
         int afterCount = EnumRegistry.getCount(ErrorCode.class);
@@ -131,8 +130,10 @@ public class ErrorCodeDemo {
         System.out.println("--------------------------");
 
         Properties props = new Properties();
-        props.setProperty("ErrorCode.err.cfg.001", "配置错误1|配置文件加载失败|Config load failed|Falha ao carregar configuração|Ошибка загрузки конфигурации|901");
-        props.setProperty("ErrorCode.err.cfg.002", "配置错误2|配置项缺失|Missing config|Configuração ausente|Отсутствует конфигурация|902");
+        props.setProperty("ErrorCode.err.cfg.001",
+                          "配置错误1|配置文件加载失败|Config load failed|Falha ao carregar configuração|Ошибка загрузки конфигурации|901");
+        props.setProperty("ErrorCode.err.cfg.002",
+                          "配置错误2|配置项缺失|Missing config|Configuração ausente|Отсутствует конфигурация|902");
 
         System.out.println("Loading from Properties object...");
         PropDyEnumsLoader<ErrorCode> loader = new PropDyEnumsLoader<>(props);
@@ -162,13 +163,13 @@ public class ErrorCodeDemo {
         System.out.println();
 
         System.out.printf("%-15s %-15s %-30s%n", "Code", "Name", "English Message");
-        System.out.println("-".repeat(60));
+        System.out.println("-------------------------");
 
         for (ErrorCode err : allCodes) {
             System.out.printf("%-15s %-15s %-30s%n",
-                    err.getCode(),
-                    err.getName(),
-                    err.getMessageEn());
+                              err.getCode(),
+                              err.getName(),
+                              err.getMessageEn());
         }
 
         System.out.println();
