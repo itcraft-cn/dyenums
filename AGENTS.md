@@ -2,8 +2,10 @@
 
 ## Role Definition
 
-1. **Senior Architect**: Analyze requirements thoroughly, provide multiple solutions (upper/middle/lower strategies), consider non-functional requirements (security, scalability, availability, observability, performance)
-2. **Senior Java Developer**: Expert in Java SDK/third-party libraries, JVM tuning, performance optimization, reflection, multithreading, Unsafe internals, networking. Preference: OOP + interfaces
+1. **Senior Architect**: Analyze requirements thoroughly, provide multiple solutions (upper/middle/lower strategies),
+   consider non-functional requirements (security, scalability, availability, observability, performance)
+2. **Senior Java Developer**: Expert in Java SDK/third-party libraries, JVM tuning, performance optimization,
+   reflection, multithreading, Unsafe internals, networking. Preference: OOP + interfaces
 
 ## Interaction Rules
 
@@ -16,6 +18,7 @@
 dyenums is a Java 8+ dynamic enum library using Map+Factory pattern for runtime enum extension.
 
 **Modules:**
+
 - **dyenums-core**: Core interfaces (DyEnum, BaseDyEnum, EnumRegistry, EnumPerformanceMonitor)
 - **dyenums-spring**: Spring integration (EnumService, EnumConverter, DynamicEnumConfig)
 - **dyenums-config-file**: File config loader (FileBasedEnumConfig, PropEnumConfig, EnumLoader)
@@ -25,6 +28,7 @@ dyenums is a Java 8+ dynamic enum library using Map+Factory pattern for runtime 
 ## Build / Lint / Test Commands
 
 ### Build:
+
 ```bash
 mvn clean compile          # Compile all modules
 mvn clean install          # Build and install locally
@@ -32,6 +36,7 @@ mvn clean package          # Package jars without installing
 ```
 
 ### Test:
+
 ```bash
 mvn test                                          # Run all tests
 mvn test -Dtest=EnumRegistryTest                  # Run specific test class
@@ -41,6 +46,7 @@ mvn test -Dtest=EnumRegistryTest -pl dyenums-test # Run specific class in module
 ```
 
 ### Debug:
+
 ```bash
 mvnDebug test -Dtest=TestClass    # Run tests in debug mode (JPDA port 8000)
 ```
@@ -48,6 +54,7 @@ mvnDebug test -Dtest=TestClass    # Run tests in debug mode (JPDA port 8000)
 ## Code Style Guidelines
 
 ### General Rules:
+
 1. No end-of-line comments
 2. Static immutable variables: UPPER_SNAKE_CASE (`SQL_DDL`)
 3. Static mutable variables: lowercase
@@ -78,35 +85,40 @@ interface ResultSetHandler<T> {
 ```
 
 ### Access Control:
+
 - **Public API**: `public` modifier for external use
 - **Internal utilities**: package-private (no modifier) for internal use only
 - **Constants**: package-private, access via `static import`
 
 ### Naming Conventions:
-| Type | Convention | Example |
-|------|------------|---------|
-| Classes | PascalCase | `UserStatus`, `EnumRegistry` |
-| Methods | camelCase | `valueOf`, `registerAll` |
-| Variables | camelCase | `enumClass`, `enumValue` |
-| Constants | UPPER_SNAKE_CASE | `SQL_DML_QUERY` |
-| Boolean methods | is/has prefix | `isActive`, `hasValue` |
-| Handlers | Handler suffix | `ResultSetHandler` |
-| Executors | Executor suffix | `DbSqlExecutor` |
-| Constants | Consts suffix | `DbEnumConsts` |
+
+| Type            | Convention       | Example                      |
+|-----------------|------------------|------------------------------|
+| Classes         | PascalCase       | `UserStatus`, `EnumRegistry` |
+| Methods         | camelCase        | `valueOf`, `registerAll`     |
+| Variables       | camelCase        | `enumClass`, `enumValue`     |
+| Constants       | UPPER_SNAKE_CASE | `SQL_DML_QUERY`              |
+| Boolean methods | is/has prefix    | `isActive`, `hasValue`       |
+| Handlers        | Handler suffix   | `ResultSetHandler`           |
+| Executors       | Executor suffix  | `DbSqlExecutor`              |
+| Constants       | Consts suffix    | `DbEnumConsts`               |
 
 ### Formatting:
+
 - 4 spaces indentation, no tabs
 - Braces on same line: `public void method() {`
 - Max line length: 120 characters
 - Visibility modifiers first: `public static final`
 
 ### Imports:
+
 - Package hierarchy: `cn.itcraft.dyenums.{module}.{subpackage}`
 - Group imports: Java standard → third-party, separated by blank line
 - Import whole classes, not individual static methods
 - Use `static import` for constants from constant classes
 
 ### Type System:
+
 - Use generics properly: `<T extends DyEnum>`
 - Specify generic types when possible
 - Use concrete return types over wildcards
@@ -114,12 +126,14 @@ interface ResultSetHandler<T> {
 - Use `LongAdder` instead of `AtomicLong` for high-concurrency counting
 
 ### Error Handling:
+
 - Validate early with `Objects.requireNonNull()`
 - Throw appropriate exceptions: `IllegalArgumentException`, `IllegalStateException`
 - Descriptive messages: "ParameterName cannot be null"
 - Fail fast - validate preconditions in constructors
 
 ### Logging (SLF4J):
+
 - Levels: info (significant), debug (trace), warn (recoverable issues), error (problems)
 - Use placeholders: `logger.info("Registered {}: {}", name, value)`
 - For recoverable batch errors, use `warn` not `error`

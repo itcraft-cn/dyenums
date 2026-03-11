@@ -1,4 +1,4 @@
-package cn.itcraft.dyenums.config.db;
+package cn.itcraft.dyenums.loader.db;
 
 import cn.itcraft.dyenums.core.DyEnum;
 import org.slf4j.Logger;
@@ -9,8 +9,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-import static cn.itcraft.dyenums.config.db.DbEnumConsts.FORBIDDEN_SQL_OP;
-import static cn.itcraft.dyenums.config.db.DbEnumConsts.VALID_SQL_OP;
+import static cn.itcraft.dyenums.loader.db.DbEnumConsts.FORBIDDEN_SQL_OP;
+import static cn.itcraft.dyenums.loader.db.DbEnumConsts.VALID_SQL_OP;
 
 /**
  * Database sql executor

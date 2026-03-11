@@ -1,7 +1,7 @@
-package cn.itcraft.dyenums.config.file;
+package cn.itcraft.dyenums.loader.file;
 
-import cn.itcraft.dyenums.config.EnumConfigLoader;
 import cn.itcraft.dyenums.core.DyEnum;
+import cn.itcraft.dyenums.loader.DyEnumsLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.function.BiFunction;
 
-import static cn.itcraft.dyenums.config.file.EnumLoader.loadFromPropertiesInternal;
+import static cn.itcraft.dyenums.loader.file.SingleLineEnumDefineParser.loadFromPropertiesInternal;
 
 /**
  * Utility class for loading enum definitions from configuration files.
@@ -36,9 +36,9 @@ import static cn.itcraft.dyenums.config.file.EnumLoader.loadFromPropertiesIntern
  * @author Helly
  * @since 1.0.0
  */
-public class FileBasedEnumConfig<T extends DyEnum> implements EnumConfigLoader<T> {
+public class FileBasedDyEnumsLoader<T extends DyEnum> implements DyEnumsLoader<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileBasedEnumConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileBasedDyEnumsLoader.class);
 
     private final String filePath;
 
@@ -48,7 +48,7 @@ public class FileBasedEnumConfig<T extends DyEnum> implements EnumConfigLoader<T
      * @param filePath the path to the properties file
      * @throws IllegalArgumentException if the path contains invalid characters
      */
-    public FileBasedEnumConfig(String filePath) {
+    public FileBasedDyEnumsLoader(String filePath) {
         Objects.requireNonNull(filePath, "File path cannot be null");
         this.filePath = validateFilePath(filePath);
     }

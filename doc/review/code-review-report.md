@@ -11,13 +11,13 @@
 
 dyenums 是一个 Java 8+ 动态枚举库，采用 Map+Factory 模式解决 Java 静态枚举的运行时扩展问题。项目采用 Maven 多模块架构：
 
-| 模块 | 职责 |
-|------|------|
-| dyenums-core | 核心接口与实现 |
-| dyenums-spring | Spring 集成 |
-| dyenums-config-file | 文件配置加载 |
-| dyenums-config-db | 数据库配置加载 |
-| dyenums-test | 测试模块 |
+| 模块                  | 职责        |
+|---------------------|-----------|
+| dyenums-core        | 核心接口与实现   |
+| dyenums-spring      | Spring 集成 |
+| dyenums-config-file | 文件配置加载    |
+| dyenums-config-db   | 数据库配置加载   |
+| dyenums-test        | 测试模块      |
 
 ---
 
@@ -28,12 +28,14 @@ dyenums 是一个 Java 8+ 动态枚举库，采用 Map+Factory 模式解决 Java
 ### 2.1 已处理的高优先级问题
 
 #### 问题 1: ~线程安全 - 竞态条件~ - **[已处理]**
+
 - **状态**: ✓ **保留原实现，但增强了安全性理解**
 - **位置**: `EnumRegistry.java:82-94`
 - **修改**: 原实现通过配合使用 `computeIfAbsent` 和 `synchronized(classRegistry)` 本身就已保证安全，无需修改
 - **效果**: 现有线程安全机制有效工作
 
 #### 问题 2: ~equals() 方法行为~ - **[已确认设计]**
+
 - **状态**: ✓ **保持原有设计原则**
 - **位置**: `BaseDyEnum.java:83-92`
 - **分析**: 该方法设计遵循 Java 的标准约定（`getClass() != obj.getClass()` 类型检查 + 业务键比较）
@@ -42,24 +44,28 @@ dyenums 是一个 Java 8+ 动态枚举库，采用 Map+Factory 模式解决 Java
 ### 2.2 已修复的中优先级问题
 
 #### 问题 3: ~数据库资源泄漏~ - **[已修复]**
+
 - **状态**: ✓ **已修复**
 - **位置**: `DatabaseEnumConfig.java:138-149`
 - **修改**: 优化 SQL 查询为 `select 1 from sys_enum limit 1` 并确认资源自动关闭
 - **效果**: 更符合 SQL 标准且保持资源安全管理
 
 #### 问题 4: ~DynamicEnumConfig.initialize() 未实现~ - **[已完善]**
+
 - **状态**: ✓ **已完善文档说明**
 - **位置**: `DynamicEnumConfig.java:68-77`
 - **修改**: 更新日志信息以表明需要通过配置文件或注解方式手动注册
 - **效果**: 提供清晰的使用说明，避免误解
 
 #### 问题 5: ~FileBasedEnumConfig 复杂格式支持~ - **[已支持]**
+
 - **状态**: ✓ **已提供全面支持**
 - **位置**: `FileBasedEnumConfig.java:156-158`
 - **修改**: 实现了对显式属性格式的解析支持（支持 name, description, order 分别指定）
 - **效果**: 按文档说明实现了对两种格式支持
 
-#### 问题 6: ~序列化版本控制~ - **[已修复]**  
+#### 问题 6: ~序列化版本控制~ - **[已修复]**
+
 - **状态**: ✓ **已修复**
 - **位置**: `BaseDyEnum.java`, `UserStatus.java`, `OrderStatus.java`
 - **修改**: 为每个类生成正确的 `serialVersionUID`
@@ -68,14 +74,17 @@ dyenums 是一个 Java 8+ 动态枚举库，采用 Map+Factory 模式解决 Java
 ### 2.3 未修改的低优先级问题（设计考量）
 
 #### 问题 7: 变更监听机制
+
 - **状态**: - 设计决定，非必须功能
 - **备注**: 当前核心功能完整，后续版本可考虑增强
 
-#### 问题 8: 配置格式解析一致性  
+#### 问题 8: 配置格式解析一致性
+
 - **状态**: - 已保持兼容现有实现
 - **备注**: 代码与工厂方法契约一致，格式标准化在使用层面处理
 
 #### 问题 9: 构造函数可访问性
+
 - **状态**: - 已保留设计灵活性
 - **备注**: 通过约定保障，保持框架通用性
 

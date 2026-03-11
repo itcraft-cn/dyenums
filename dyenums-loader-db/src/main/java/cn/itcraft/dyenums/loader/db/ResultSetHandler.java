@@ -1,4 +1,4 @@
-package cn.itcraft.dyenums.config.db;
+package cn.itcraft.dyenums.loader.db;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -1,4 +1,4 @@
-package cn.itcraft.dyenums.config;
+package cn.itcraft.dyenums.loader;
 
 import cn.itcraft.dyenums.core.DyEnum;
 
@@ -12,13 +12,13 @@ import java.util.function.BiFunction;
  * @author Helly
  * @since 1.0.0
  */
-public interface EnumConfigLoader<T extends DyEnum> {
+public interface DyEnumsLoader<T extends DyEnum> {
 
     /**
      * Loads enum definitions from the configured source.
      *
      * @param enumClass the enum class to load
-     * @param factory function to create enum instances (code, valueString -> enum)
+     * @param factory   function to create enum instances (code, valueString -> enum)
      * @return the number of enums loaded
      * @throws Exception if loading fails
      */

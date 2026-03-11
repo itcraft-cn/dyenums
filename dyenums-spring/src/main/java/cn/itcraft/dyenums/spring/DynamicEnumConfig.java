@@ -71,8 +71,8 @@ public class DynamicEnumConfig {
             LOGGER.info("Enum auto-loading is enabled from: {}", configPath);
             LOGGER.info("Actual loading will occur through @EnumDefinition annotation processing or manual loading.");
         } else {
-            LOGGER.debug("Enum auto-loading is disabled (auto-load={}, config-path={})", 
-                        autoLoadConfig, configPath);
+            LOGGER.debug("Enum auto-loading is disabled (auto-load={}, config-path={})",
+                         autoLoadConfig, configPath);
         }
     }
 }

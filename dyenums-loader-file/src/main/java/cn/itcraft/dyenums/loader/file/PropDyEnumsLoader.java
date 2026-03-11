@@ -1,14 +1,14 @@
-package cn.itcraft.dyenums.config.file;
+package cn.itcraft.dyenums.loader.file;
 
-import cn.itcraft.dyenums.config.EnumConfigLoader;
 import cn.itcraft.dyenums.core.DyEnum;
+import cn.itcraft.dyenums.loader.DyEnumsLoader;
 
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.function.BiFunction;
 
-import static cn.itcraft.dyenums.config.file.EnumLoader.loadFromPropertiesInternal;
+import static cn.itcraft.dyenums.loader.file.SingleLineEnumDefineParser.loadFromPropertiesInternal;
 
 /**
  * Utility class for loading enum definitions from configuration files.
@@ -30,7 +30,7 @@ import static cn.itcraft.dyenums.config.file.EnumLoader.loadFromPropertiesIntern
  * @author Helly
  * @since 1.0.0
  */
-public class PropEnumConfig<T extends DyEnum> implements EnumConfigLoader<T> {
+public class PropDyEnumsLoader<T extends DyEnum> implements DyEnumsLoader<T> {
 
     private final Properties properties;
 
@@ -39,7 +39,7 @@ public class PropEnumConfig<T extends DyEnum> implements EnumConfigLoader<T> {
      *
      * @param properties the properties containing enum definitions
      */
-    public PropEnumConfig(Properties properties) {
+    public PropDyEnumsLoader(Properties properties) {
         this.properties = Objects.requireNonNull(properties, "Properties cannot be null");
     }
 

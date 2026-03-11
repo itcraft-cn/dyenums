@@ -24,8 +24,8 @@
 
     <modules>
         <module>dyenums-core</module>
-        <module>dyenums-config-file</module>
-        <module>dyenums-config-db</module>
+        <module>dyenums-loader-file</module>
+        <module>dyenums-loader-db</module>
         <module>dyenums-spring</module>
         <module>dyenums-test</module>
     </modules>

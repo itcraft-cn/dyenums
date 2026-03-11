@@ -1,4 +1,4 @@
-package cn.itcraft.dyenums.config.db;
+package cn.itcraft.dyenums.loader.db;
 
 import cn.itcraft.dyenums.core.DyEnum;
 import cn.itcraft.dyenums.core.EnumRegistry;

@@ -32,18 +32,18 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- Config File Module -->
+        <!-- Load File Module -->
         <dependency>
             <groupId>cn.itcraft</groupId>
-            <artifactId>dyenums-config-file</artifactId>
+            <artifactId>dyenums-loader-file</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 
-        <!-- Config DB Module -->
+        <!-- Load DB Module -->
         <dependency>
             <groupId>cn.itcraft</groupId>
-            <artifactId>dyenums-config-db</artifactId>
+            <artifactId>dyenums-loader-db</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

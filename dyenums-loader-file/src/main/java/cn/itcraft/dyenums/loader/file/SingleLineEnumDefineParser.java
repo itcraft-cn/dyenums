@@ -1,4 +1,4 @@
-package cn.itcraft.dyenums.config.file;
+package cn.itcraft.dyenums.loader.file;
 
 import cn.itcraft.dyenums.core.DyEnum;
 import cn.itcraft.dyenums.core.EnumRegistry;
@@ -30,9 +30,9 @@ import java.util.function.BiFunction;
  * @author Helly
  * @since 1.0.0
  */
-final class EnumLoader {
+final class SingleLineEnumDefineParser {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnumLoader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SingleLineEnumDefineParser.class);
 
     /**
      * Parses order value from string, returning default if parsing fails.

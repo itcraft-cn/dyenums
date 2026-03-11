@@ -26,16 +26,24 @@ public abstract class BaseDyEnum implements DyEnum, Serializable {
 
     private static final long serialVersionUID = -533038945084607168L;
 
-    /** Maximum allowed length for code field */
+    /**
+     * Maximum allowed length for code field
+     */
     private static final int MAX_CODE_LENGTH = 50;
 
-    /** Maximum allowed length for name field */
+    /**
+     * Maximum allowed length for name field
+     */
     private static final int MAX_NAME_LENGTH = 100;
 
-    /** Maximum allowed length for description field */
+    /**
+     * Maximum allowed length for description field
+     */
     private static final int MAX_DESCRIPTION_LENGTH = 500;
 
-    /** Maximum allowed order value */
+    /**
+     * Maximum allowed order value
+     */
     private static final int MAX_ORDER = 999999;
 
     protected final String code;
@@ -65,22 +73,22 @@ public abstract class BaseDyEnum implements DyEnum, Serializable {
         }
         if (trimmedCode.length() > MAX_CODE_LENGTH) {
             throw new IllegalArgumentException(
-                "Code cannot exceed " + MAX_CODE_LENGTH + " characters, got: " + trimmedCode.length());
+                    "Code cannot exceed " + MAX_CODE_LENGTH + " characters, got: " + trimmedCode.length());
         }
         if (trimmedName.isEmpty()) {
             throw new IllegalArgumentException("Name cannot be empty");
         }
         if (trimmedName.length() > MAX_NAME_LENGTH) {
             throw new IllegalArgumentException(
-                "Name cannot exceed " + MAX_NAME_LENGTH + " characters, got: " + trimmedName.length());
+                    "Name cannot exceed " + MAX_NAME_LENGTH + " characters, got: " + trimmedName.length());
         }
         if (description != null && description.length() > MAX_DESCRIPTION_LENGTH) {
             throw new IllegalArgumentException(
-                "Description cannot exceed " + MAX_DESCRIPTION_LENGTH + " characters, got: " + description.length());
+                    "Description cannot exceed " + MAX_DESCRIPTION_LENGTH + " characters, got: " + description.length());
         }
         if (order < 0 || order > MAX_ORDER) {
             throw new IllegalArgumentException(
-                "Order must be between 0 and " + MAX_ORDER + ", got: " + order);
+                    "Order must be between 0 and " + MAX_ORDER + ", got: " + order);
         }
 
         this.code = trimmedCode;
@@ -125,7 +133,7 @@ public abstract class BaseDyEnum implements DyEnum, Serializable {
             return false;
         }
         BaseDyEnum that = (BaseDyEnum) obj;
-        
+
         // Since all field values are set by constructor and guaranteed non-null via validation,
         // we only need to compare the code field for semantic equality
         // Code is the business identifier that makes each enum value unique within a class
@@ -165,7 +173,7 @@ public abstract class BaseDyEnum implements DyEnum, Serializable {
      * @param in the object input stream
      * @throws InvalidObjectException if the deserialized object is invalid
      */
-    private void readObject(ObjectInputStream in) 
+    private void readObject(ObjectInputStream in)
             throws java.io.IOException, ClassNotFoundException {
         in.defaultReadObject();
         // Basic validation - fields should have been validated by constructor
@@ -189,13 +197,13 @@ public abstract class BaseDyEnum implements DyEnum, Serializable {
         // Look up the registered instance by code
         Class<? extends DyEnum> enumClass = (Class<? extends DyEnum>) this.getClass();
         java.util.Optional<? extends DyEnum> existing = EnumRegistry.valueOf(enumClass, this.code);
-        
+
         if (existing.isPresent()) {
             return existing.get();
         }
-        
+
         // Reject unregistered enum instances
         throw new InvalidObjectException(
-            "Cannot deserialize unregistered enum: " + this.getClass().getSimpleName() + "." + this.code);
+                "Cannot deserialize unregistered enum: " + this.getClass().getSimpleName() + "." + this.code);
     }
 }

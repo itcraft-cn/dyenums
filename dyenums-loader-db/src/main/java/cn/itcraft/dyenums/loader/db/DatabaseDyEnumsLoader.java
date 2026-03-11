@@ -1,7 +1,7 @@
-package cn.itcraft.dyenums.config.db;
+package cn.itcraft.dyenums.loader.db;
 
-import cn.itcraft.dyenums.config.EnumConfigLoader;
 import cn.itcraft.dyenums.core.DyEnum;
+import cn.itcraft.dyenums.loader.DyEnumsLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,10 +10,10 @@ import java.util.Objects;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BiFunction;
 
-import static cn.itcraft.dyenums.config.db.DbEnumConsts.COLUMN_MAPPINGS;
-import static cn.itcraft.dyenums.config.db.DbEnumConsts.SQL_DML_QUERY;
-import static cn.itcraft.dyenums.config.db.DbEnumConsts.SQL_DML_VALID;
-import static cn.itcraft.dyenums.config.db.DbSqlExecutor.validateQuery;
+import static cn.itcraft.dyenums.loader.db.DbEnumConsts.COLUMN_MAPPINGS;
+import static cn.itcraft.dyenums.loader.db.DbEnumConsts.SQL_DML_QUERY;
+import static cn.itcraft.dyenums.loader.db.DbEnumConsts.SQL_DML_VALID;
+import static cn.itcraft.dyenums.loader.db.DbSqlExecutor.validateQuery;
 
 /**
  * Database configuration loader for enum definitions.
@@ -24,9 +24,9 @@ import static cn.itcraft.dyenums.config.db.DbSqlExecutor.validateQuery;
  * @author Helly
  * @since 1.0.0
  */
-public class DatabaseEnumConfig<T extends DyEnum> implements EnumConfigLoader<T> {
+public class DatabaseDyEnumsLoader<T extends DyEnum> implements DyEnumsLoader<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseEnumConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseDyEnumsLoader.class);
 
     private static final ResultSetHandler<? extends DyEnum> HANDLE_NONE = rs -> {
     };
@@ -41,7 +41,7 @@ public class DatabaseEnumConfig<T extends DyEnum> implements EnumConfigLoader<T>
      *
      * @param dataSource the data source to use
      */
-    public DatabaseEnumConfig(DataSource dataSource) {
+    public DatabaseDyEnumsLoader(DataSource dataSource) {
         this(dataSource, SQL_DML_QUERY, SQL_DML_VALID, COLUMN_MAPPINGS);
     }
 
@@ -51,7 +51,7 @@ public class DatabaseEnumConfig<T extends DyEnum> implements EnumConfigLoader<T>
      * @param dataSource the data source to use
      * @param query      the SQL query to execute
      */
-    public DatabaseEnumConfig(DataSource dataSource, String query) {
+    public DatabaseDyEnumsLoader(DataSource dataSource, String query) {
         this(dataSource, query, SQL_DML_VALID, COLUMN_MAPPINGS);
     }
 
@@ -62,7 +62,7 @@ public class DatabaseEnumConfig<T extends DyEnum> implements EnumConfigLoader<T>
      * @param query      the SQL query to execute
      * @param validQuery the SQL query to execute
      */
-    public DatabaseEnumConfig(DataSource dataSource, String query, String validQuery) {
+    public DatabaseDyEnumsLoader(DataSource dataSource, String query, String validQuery) {
         this(dataSource, query, SQL_DML_VALID, COLUMN_MAPPINGS);
     }
 
@@ -75,7 +75,7 @@ public class DatabaseEnumConfig<T extends DyEnum> implements EnumConfigLoader<T>
      * @param columnMappings array of column names in order: [code, name, description, order]
      * @throws IllegalArgumentException if query contains forbidden SQL keywords or is not a SELECT statement
      */
-    public DatabaseEnumConfig(DataSource dataSource, String query, String validQuery, String[] columnMappings) {
+    public DatabaseDyEnumsLoader(DataSource dataSource, String query, String validQuery, String[] columnMappings) {
         this.dataSource = Objects.requireNonNull(dataSource, "DataSource cannot be null");
         this.query = validateQuery(Objects.requireNonNull(query, "Query cannot be null"));
         this.validQuery = validateQuery(Objects.requireNonNull(validQuery, "Query cannot be null"));

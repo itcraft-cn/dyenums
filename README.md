@@ -115,7 +115,7 @@ OrderStatus.PROCESSING=PROCESSING|处理中|订单正在处理|2
 #### Load Configuration
 
 ```java
-import cn.itcraft.dyenums.config.FileBasedEnumConfig;
+import cn.itcraft.dyenums.loader.FileBasedEnumConfig;
 import java.util.Properties;
 
 // Load from file
