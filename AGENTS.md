@@ -21,8 +21,8 @@ dyenums 是一个 Java 8+ 动态枚举库，采用 Map+Factory 模式解决 Java
 ### 模块结构：
 - **dyenums-core**: 核心接口与实现 (DyEnum, BaseDyEnum, EnumRegistry, EnumPerformanceMonitor)
 - **dyenums-spring**: Spring 集成 (EnumService, EnumConverter, DynamicEnumConfig)
-- **dyenums-config-file**: 文件配置加载 (FileBasedEnumConfig)
-- **dyenums-config-db**: 数据库配置加载 (DatabaseEnumConfig)
+- **dyenums-config-file**: 文件配置加载 (FileBasedEnumConfig, PropEnumConfig)
+- **dyenums-config-db**: 数据库配置加载 (DatabaseEnumConfig, DbSqlExecutor, DbEnumConsts)
 - **dyenums-test**: 测试模块和示例枚举
 
 ## 编码规范
@@ -32,6 +32,94 @@ dyenums 是一个 Java 8+ 动态枚举库，采用 Map+Factory 模式解决 Java
 1. 不使用尾注释
 2. 静态不可变变量名大写 (如: `serialVersionUID`)
 3. 静态可变变量名小写
+4. 类设计遵循单一职责原则，一个大类应拆分为多个职责明确的小类
+5. 优先使用组合而非继承
+
+### 类设计规范
+
+#### 工具类模式
+```java
+// 工具类：final class + 私有构造函数
+final class DbSqlExecutor {
+    private DbSqlExecutor() {
+    }
+    
+    static void execSql(...) { }
+}
+```
+
+#### 常量类模式
+```java
+// 常量类：final class + 私有构造函数 + static final 字段
+final class DbEnumConsts {
+    static final String SQL_DDL = "...";
+    static final String[] FORBIDDEN_SQL_OP = {...};
+    
+    private DbEnumConsts() {
+    }
+}
+```
+
+#### 函数式接口
+```java
+// 使用 @FunctionalInterface 标注单一方法接口
+@FunctionalInterface
+interface ResultSetHandler<T> {
+    void process(ResultSet resultSet) throws SQLException;
+}
+```
+
+### 访问控制规范
+
+1. **公共 API**: 使用 `public` 修饰，暴露给外部使用
+2. **内部工具类**: 使用 `package-private` (无修饰符)，仅包内可见
+3. **常量类**: 使用 `package-private`，通过 `static import` 引入
+
+```java
+// 内部工具类 - 包级私有
+final class EnumLoader {
+    static int loadFromPropertiesInternal(...) { }
+}
+
+// 外部使用
+import static cn.itcraft.dyenums.config.file.EnumLoader.loadFromPropertiesInternal;
+```
+
+### 常量管理规范
+
+1. 模块级常量集中在专门的常量类中 (如 `DbEnumConsts`)
+2. 类级常量定义在类的开头
+3. SQL 语句必须定义为常量，禁止内联字符串
+
+```java
+// 推荐
+static final String SQL_DML_QUERY = 
+    "SELECT ENUM_CLASS, CODE, NAME, DESCRIPTION FROM SYS_ENUM WHERE ENUM_CLASS = ?";
+
+// 禁止
+stmt.executeQuery("SELECT * FROM table");  // ❌ 内联SQL
+```
+
+### SQL 安全规范
+
+1. 所有 SQL 查询必须通过验证
+2. 禁止危险 SQL 关键字：`DROP`, `DELETE`, `TRUNCATE`, `ALTER`, `INSERT`, `UPDATE`, `EXEC`, `EXECUTE`
+3. 只允许 `SELECT` 语句
+
+```java
+static String validateQuery(String query) {
+    String upperQuery = query.toUpperCase().trim();
+    if (!upperQuery.startsWith("SELECT")) {
+        throw new IllegalArgumentException("Query must be a SELECT statement");
+    }
+    for (String keyword : FORBIDDEN_SQL_OP) {
+        if (upperQuery.contains(keyword)) {
+            throw new IllegalArgumentException("Query contains forbidden SQL keyword: " + keyword);
+        }
+    }
+    return query;
+}
+```
 
 ## Build / Lint / Test Commands
 
@@ -57,6 +145,7 @@ dyenums 是一个 Java 8+ 动态枚举库，采用 Map+Factory 模式解决 Java
 - Group imports: standard Java first, then third-party, blank line separation
 - Import entire classes, not static methods individually (e.g., `import java.util.Objects`)
 - Use fully qualified class names in @throws Javadoc when referencing exceptions
+- Use `static import` for constants from internal constant classes
 
 ### Formatting:
 - 4 space indentation, no tabs
@@ -71,15 +160,19 @@ dyenums 是一个 Java 8+ 动态枚举库，采用 Map+Factory 模式解决 Java
 - Variables: camelCase (`enumClass`, `enumValue`)
 - Constants: UPPER_SNAKE_CASE (`private static final long serialVersionUID`)
 - Boolean methods: prefix with `is` or `has` (`isActive`, `isBlocked`, `requiresAdminAction`)
+- Handler classes: suffix with `Handler` (`ResultSetHandler`, `DyEnumQueryHandler`)
+- Executor classes: suffix with `Executor` (`DbSqlExecutor`)
+- Constants classes: suffix with `Consts` (`DbEnumConsts`)
 
 ### Type System:
 - Use generics properly: `<T extends DyEnum>`
 - Always specify generic types when possible
 - Use concrete return types over wildcards where practical
 - Mark fields as `final` when immutable (all class fields in BaseDyEnum)
+- Use `LongAdder` instead of `AtomicLong` for high-concurrency counting
 
 ### Error Handling:
-- Validate input parameters early with `Objects.requireNonNull()`)
+- Validate input parameters early with `Objects.requireNonNull()`
 - Throw appropriate exceptions for invalid states (`IllegalArgumentException`, `IllegalStateException`)
 - Use descriptive exception messages: "ParameterName cannot be null" or "Code cannot be empty"
 - Fail fast principle - validate preconditions in constructors and public methods
@@ -99,6 +192,7 @@ dyenums 是一个 Java 8+ 动态枚举库，采用 Map+Factory 模式解决 Java
 - Keep interfaces small and focused (DyEnum interface)  
 - Use abstract base classes for shared implementation (BaseDyEnum)
 - Follow immutability principles by keeping instance variables `protected final`
+- Extract large methods into smaller, focused classes (Single Responsibility Principle)
 
 ### Testing Guidelines:
 - Write comprehensive unit tests covering boundary conditions, invalid inputs, and concurrent scenarios
@@ -112,6 +206,7 @@ dyenums 是一个 Java 8+ 动态枚举库，采用 Map+Factory 模式解决 Java
 - Use appropriate log levels (info for significant operations, debug for trace, warn/error for problems)
 - Log important operations like `Dynamically created enum`
 - Use placeholders in log messages: `logger.info("Registered {}: {}", enumClass.getSimpleName(), code)`
+- For recoverable errors in batch processing, use `warn` instead of `error`
 
 ## Thread Safety Guidelines
 
@@ -122,7 +217,7 @@ dyenums 是一个 Java 8+ 动态枚举库，采用 Map+Factory 模式解决 Java
 - Always synchronize when creating new registry entries to prevent race conditions
 
 ### Thread-Safe Operations:
-- `EnumRegistry.register()` - Thread-safe with double-checked locking
+- `EnumRegistry.register()` - Thread-safe with computeIfAbsent
 - `EnumRegistry.registerAll()` - Batch registration under single synchronization
 - `EnumRegistry.valueOf()` - Thread-safe read operation
 - `EnumRegistry.values()` - Returns unmodifiable list, thread-safe
