@@ -8,16 +8,11 @@ import cn.itcraft.dyenums.loader.file.FileBasedDyEnumsLoaderTest;
 import cn.itcraft.dyenums.loader.file.PropDyEnumsLoaderTest;
 import cn.itcraft.dyenums.sample.ErrorCodeTest;
 import cn.itcraft.dyenums.spring.SpringIntegrationTest;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
-/**
- * Test suite for all dyenums tests.
- *
- * @author Helly
- * @since 1.0.0
- */
-@Suite.SuiteClasses({
+@Suite
+@SelectClasses({
         BaseDyEnumTest.class,
         EnumRegistryTest.class,
         FileBasedDyEnumsLoaderTest.class,
@@ -27,6 +22,5 @@ import org.junit.runners.Suite;
         ErrorCodeTest.class,
         EnumIntegrationTest.class
 })
-@RunWith(Suite.class)
 public class DyEnumTestSuite {
 }

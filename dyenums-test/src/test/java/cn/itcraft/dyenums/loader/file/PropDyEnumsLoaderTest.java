@@ -3,33 +3,28 @@ package cn.itcraft.dyenums.loader.file;
 import cn.itcraft.dyenums.core.EnumRegistry;
 import cn.itcraft.dyenums.model.OrderStatus;
 import cn.itcraft.dyenums.model.UserStatus;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Unit tests for PropDyEnumsLoader.
- *
- * @author Helly
- * @since 1.0.0
- */
 public class PropDyEnumsLoaderTest {
 
-    @Before
+    @BeforeEach
     public void setUp() {
         EnumRegistry.clear();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         EnumRegistry.clear();
     }
@@ -120,9 +115,11 @@ public class PropDyEnumsLoaderTest {
         assertFalse(loader.validateSource());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testConstructor_NullProperties() {
-        new PropDyEnumsLoader<UserStatus>(null);
+        assertThrows(NullPointerException.class, () -> {
+            new PropDyEnumsLoader<UserStatus>(null);
+        });
     }
 
     @Test

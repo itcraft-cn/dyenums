@@ -3,31 +3,26 @@ package cn.itcraft.dyenums.loader.db;
 import cn.itcraft.dyenums.core.EnumRegistry;
 import cn.itcraft.dyenums.model.UserStatus;
 import org.h2.jdbcx.JdbcConnectionPool;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Unit tests for DatabaseDyEnumsLoader using H2 in-memory database.
- *
- * @author Helly
- * @since 1.0.0
- */
 public class DatabaseDyEnumsLoaderTest {
 
     private DataSource dataSource;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         EnumRegistry.clear();
         
@@ -51,7 +46,7 @@ public class DatabaseDyEnumsLoaderTest {
         }
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         EnumRegistry.clear();
         
@@ -93,18 +88,22 @@ public class DatabaseDyEnumsLoaderTest {
         assertFalse(EnumRegistry.contains(UserStatus.class, "DB_STATUS2"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testLoad_InvalidQuery_NotSelect() {
         String invalidQuery = "DELETE FROM SYS_ENUM";
         
-        new DatabaseDyEnumsLoader<UserStatus>(dataSource, invalidQuery);
+        assertThrows(IllegalArgumentException.class, () -> {
+            new DatabaseDyEnumsLoader<UserStatus>(dataSource, invalidQuery);
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testLoad_InvalidQuery_ForbiddenKeyword() {
         String invalidQuery = "SELECT * FROM SYS_ENUM; DROP TABLE SYS_ENUM";
         
-        new DatabaseDyEnumsLoader<UserStatus>(dataSource, invalidQuery);
+        assertThrows(IllegalArgumentException.class, () -> {
+            new DatabaseDyEnumsLoader<UserStatus>(dataSource, invalidQuery);
+        });
     }
 
     @Test
@@ -126,21 +125,27 @@ public class DatabaseDyEnumsLoaderTest {
         assertFalse(loader.validateSource());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConstructor_InvalidColumnMappings() {
         String[] invalidMappings = {"code", "name"};
         
-        new DatabaseDyEnumsLoader<UserStatus>(dataSource, "SELECT 1", "SELECT 1", invalidMappings);
+        assertThrows(IllegalArgumentException.class, () -> {
+            new DatabaseDyEnumsLoader<UserStatus>(dataSource, "SELECT 1", "SELECT 1", invalidMappings);
+        });
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testConstructor_NullDataSource() {
-        new DatabaseDyEnumsLoader<UserStatus>(null);
+        assertThrows(NullPointerException.class, () -> {
+            new DatabaseDyEnumsLoader<UserStatus>(null);
+        });
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testConstructor_NullQuery() {
-        new DatabaseDyEnumsLoader<UserStatus>(dataSource, null);
+        assertThrows(NullPointerException.class, () -> {
+            new DatabaseDyEnumsLoader<UserStatus>(dataSource, null);
+        });
     }
 
     @Test

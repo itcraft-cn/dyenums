@@ -1,19 +1,12 @@
 package cn.itcraft.dyenums.core;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * Unit tests for BaseDyEnum.
- * Tests the base functionality of dynamic enum implementations.
- *
- * @author Helly
- * @since 1.0.0
- */
 public class BaseDyEnumTest {
 
     @Test
@@ -156,9 +149,6 @@ public class BaseDyEnumTest {
         assertEquals("Desc", enumValue.getDescription());
     }
 
-    /**
-     * Test enum for testing purposes.
-     */
     private static class TestEnum extends BaseDyEnum {
         private static final long serialVersionUID = 1L;
 

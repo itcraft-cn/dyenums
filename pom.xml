@@ -18,7 +18,7 @@
 
     <properties>
         <plugin.compiler>3.8.1</plugin.compiler>
-        <plugin.surefire>2.22.2</plugin.surefire>
+        <plugin.surefire>3.1.2</plugin.surefire>
         <plugin.source>3.2.1</plugin.source>
         <plugin.javadoc>3.3.2</plugin.javadoc>
         <plugin.gpg>1.5</plugin.gpg>
@@ -30,7 +30,7 @@
         <h2.version>2.2.224</h2.version>
         <annotation.version>1.3.2</annotation.version>
         <spring.version>5.3.39</spring.version>
-        <junit.version>4.13.2</junit.version>
+        <junit.version>5.10.0</junit.version>
     </properties>
 
     <modules>
@@ -79,10 +79,10 @@
                 <version>${annotation.version}</version>
             </dependency>
 
-            <!-- JUnit for testing -->
+            <!-- JUnit Jupiter for testing -->
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
                 <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>

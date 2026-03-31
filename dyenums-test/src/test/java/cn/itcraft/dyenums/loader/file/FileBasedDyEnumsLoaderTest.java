@@ -3,32 +3,27 @@ package cn.itcraft.dyenums.loader.file;
 import cn.itcraft.dyenums.core.EnumRegistry;
 import cn.itcraft.dyenums.model.OrderStatus;
 import cn.itcraft.dyenums.model.UserStatus;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Unit tests for FileBasedDyEnumsLoader.
- *
- * @author Helly
- * @since 1.0.0
- */
 public class FileBasedDyEnumsLoaderTest {
 
-    @Before
+    @BeforeEach
     public void setUp() {
         EnumRegistry.clear();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         EnumRegistry.clear();
     }
@@ -63,11 +58,13 @@ public class FileBasedDyEnumsLoaderTest {
         assertEquals(400, complex1.getOrder());
     }
 
-    @Test(expected = IOException.class)
+    @Test
     public void testLoad_FileNotFound() throws IOException {
         FileBasedDyEnumsLoader<UserStatus> loader = new FileBasedDyEnumsLoader<>("non-existent-file.properties");
         
-        loader.load(UserStatus.class, UserStatus::fromValueString);
+        assertThrows(IOException.class, () -> {
+            loader.load(UserStatus.class, UserStatus::fromValueString);
+        });
     }
 
     @Test
@@ -84,14 +81,18 @@ public class FileBasedDyEnumsLoaderTest {
         assertFalse(loader.validateSource());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testConstructor_PathTraversal() {
-        new FileBasedDyEnumsLoader<>("../secret/config.properties");
+        assertThrows(IllegalArgumentException.class, () -> {
+            new FileBasedDyEnumsLoader<>("../secret/config.properties");
+        });
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testConstructor_NullFilePath() {
-        new FileBasedDyEnumsLoader<UserStatus>(null);
+        assertThrows(NullPointerException.class, () -> {
+            new FileBasedDyEnumsLoader<UserStatus>(null);
+        });
     }
 
     @Test

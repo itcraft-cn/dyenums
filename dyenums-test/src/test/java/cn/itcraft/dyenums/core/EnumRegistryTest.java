@@ -1,9 +1,9 @@
 package cn.itcraft.dyenums.core;
 
 import cn.itcraft.dyenums.annotation.EnumDefinition;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,30 +11,21 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * Unit tests for EnumRegistry.
- * Tests the core registry functionality including registration, lookup, and management.
- *
- * @author Helly
- * @since 1.0.0
- */
 public class EnumRegistryTest {
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        // Clear the registry before each test
         EnumRegistry.clear();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
-        // Clean up after each test
         EnumRegistry.clear();
     }
 
@@ -103,7 +94,6 @@ public class EnumRegistryTest {
 
     @Test
     public void testValues_SortedByOrder() {
-        // Register in random order
         EnumRegistry.register(TestEnum.class, TestEnum.VALUE3);
         EnumRegistry.register(TestEnum.class, TestEnum.VALUE1);
         EnumRegistry.register(TestEnum.class, TestEnum.VALUE2);
@@ -144,7 +134,6 @@ public class EnumRegistryTest {
         assertEquals("Created dynamically", newEnum.getDescription());
         assertEquals(10, newEnum.getOrder());
 
-        // Verify it's registered
         Optional<TestEnum> result = EnumRegistry.valueOf(TestEnum.class, "DYNAMIC");
         assertTrue(result.isPresent());
         assertEquals(newEnum, result.get());
@@ -203,11 +192,9 @@ public class EnumRegistryTest {
         EnumRegistry.register(TestEnum.class, TestEnum.VALUE1);
         EnumRegistry.register(AnotherEnum.class, new AnotherEnum("TEST", "Test", "Desc", 1));
 
-        // Should not find TestEnum in AnotherEnum registry
         Optional<AnotherEnum> result = EnumRegistry.valueOf(AnotherEnum.class, "VALUE1");
         assertFalse(result.isPresent());
 
-        // Should find TEST in AnotherEnum registry
         result = EnumRegistry.valueOf(AnotherEnum.class, "TEST");
         assertTrue(result.isPresent());
     }
@@ -260,15 +247,12 @@ public class EnumRegistryTest {
         List<TestEnum> values = EnumRegistry.values(TestEnum.class);
         int originalSize = values.size();
 
-        // Try to modify the returned list
         try {
             values.add(new TestEnum("NEW", "New", "New value", 99));
             fail("Expected UnsupportedOperationException");
         } catch (UnsupportedOperationException e) {
-            // Expected
         }
 
-        // Verify the original list is unchanged
         assertEquals(originalSize, EnumRegistry.values(TestEnum.class).size());
     }
 
@@ -304,23 +288,17 @@ public class EnumRegistryTest {
             });
         }
 
-        // Start all threads
         for (Thread thread : threads) {
             thread.start();
         }
 
-        // Wait for all threads to complete
         for (Thread thread : threads) {
             thread.join();
         }
 
-        // Verify all enums were registered
         assertEquals(threadCount * enumsPerThread, EnumRegistry.getCount(TestEnum.class));
     }
 
-    /**
-     * Test enum for testing purposes.
-     */
     @EnumDefinition(category = "test", dynamic = true, description = "Test enum")
     public static class TestEnum extends BaseDyEnum {
         public static final TestEnum VALUE1 = new TestEnum("VALUE1", "Value One", "First value", 1);
@@ -341,9 +319,6 @@ public class EnumRegistryTest {
         }
     }
 
-    /**
-     * Another test enum to verify class isolation.
-     */
     @EnumDefinition(category = "test", dynamic = true, description = "Another test enum")
     public static class AnotherEnum extends BaseDyEnum {
         private static final long serialVersionUID = 1L;

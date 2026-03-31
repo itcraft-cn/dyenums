@@ -3,31 +3,25 @@ package cn.itcraft.dyenums.spring;
 import cn.itcraft.dyenums.core.EnumRegistry;
 import cn.itcraft.dyenums.model.OrderStatus;
 import cn.itcraft.dyenums.model.UserStatus;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Spring integration tests for dyenums.
- * Tests Spring container integration, bean injection, and converter functionality.
- *
- * @author Helly
- * @since 1.0.0
- */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = DyEnumSpringTestConfig.class)
 public class SpringIntegrationTest {
 
@@ -40,7 +34,7 @@ public class SpringIntegrationTest {
     @Autowired
     private EnumConverter<OrderStatus> orderStatusConverter;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         EnumRegistry.clear();
         EnumRegistry.register(UserStatus.class, UserStatus.ACTIVE);
@@ -51,14 +45,14 @@ public class SpringIntegrationTest {
         EnumRegistry.register(OrderStatus.class, OrderStatus.DELIVERED);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         EnumRegistry.clear();
     }
 
     @Test
     public void testEnumServiceInjection() {
-        assertNotNull("EnumService should be injected by Spring", enumService);
+        assertNotNull(enumService, "EnumService should be injected by Spring");
     }
 
     @Test
@@ -81,19 +75,25 @@ public class SpringIntegrationTest {
         assertTrue(status.isInProgress());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testEnumConverter_InvalidCode() {
-        userStatusConverter.convert("INVALID_CODE");
+        assertThrows(IllegalArgumentException.class, () -> {
+            userStatusConverter.convert("INVALID_CODE");
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testEnumConverter_EmptyCode() {
-        userStatusConverter.convert("");
+        assertThrows(IllegalArgumentException.class, () -> {
+            userStatusConverter.convert("");
+        });
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testEnumConverter_NullCode() {
-        userStatusConverter.convert(null);
+        assertThrows(IllegalArgumentException.class, () -> {
+            userStatusConverter.convert(null);
+        });
     }
 
     @Test

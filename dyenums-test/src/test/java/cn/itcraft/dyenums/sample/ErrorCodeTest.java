@@ -2,9 +2,9 @@ package cn.itcraft.dyenums.sample;
 
 import cn.itcraft.dyenums.core.EnumRegistry;
 import cn.itcraft.dyenums.loader.file.PropDyEnumsLoader;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -14,26 +14,21 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Unit tests for ErrorCode multi-language support.
- *
- * @author Helly
- * @since 1.0.0
- */
 public class ErrorCodeTest {
 
-    @Before
+    @BeforeEach
     public void setUp() {
         EnumRegistry.clear();
         registerPredefinedErrorCodes();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         EnumRegistry.clear();
     }
@@ -189,19 +184,25 @@ public class ErrorCodeTest {
         assertEquals("Тестовое сообщение", err.getMessageRu());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testFromValueString_InvalidFormat() {
-        ErrorCode.fromValueString("err.invalid", "invalid format");
+        assertThrows(IllegalArgumentException.class, () -> {
+            ErrorCode.fromValueString("err.invalid", "invalid format");
+        });
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testFromValueString_NullCode() {
-        ErrorCode.fromValueString(null, "name|zh|en|pt|ru|1");
+        assertThrows(NullPointerException.class, () -> {
+            ErrorCode.fromValueString(null, "name|zh|en|pt|ru|1");
+        });
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testFromValueString_NullValueString() {
-        ErrorCode.fromValueString("err.test", null);
+        assertThrows(NullPointerException.class, () -> {
+            ErrorCode.fromValueString("err.test", null);
+        });
     }
 
     @Test
