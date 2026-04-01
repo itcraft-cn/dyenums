@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cn.itcraft</groupId>
     <artifactId>dyenums-parent</artifactId>
-    <version>1.0.0</version><!-- managed by updgitver -->
+    <version>1.0.0</version>    <!-- managed by updgitver -->
     <packaging>pom</packaging>
 
     <name>dyenums-parent</name>
@@ -15,6 +14,27 @@
         Dynamic Enum Library for Java - Parent POM
         a dynamic enum library for Java 8+ that provides runtime-extensible enums. Unlike traditional Java enums that are fixed at compile time, dyenums allows you to register, modify, and load enum values at runtime.
     </description>
+    <url>https://itcraft.cn/dyenums/</url>
+
+    <scm>
+        <connection>scm:git:git://github.com/itcraft-cn/dyenums.git</connection>
+        <developerConnection>scm:git:ssh://github.com/itcraft-cn/dyenums.git</developerConnection>
+        <url>https://github.com/itcraft-cn/dyenums/</url>
+    </scm>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Helly Guo</name>
+            <email>hellyguo@foxmail.com</email>
+        </developer>
+    </developers>
 
     <properties>
         <plugin.compiler>3.8.1</plugin.compiler>
@@ -132,6 +152,14 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
                     <version>${plugin.source}</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
 
                 <!-- Javadoc Plugin -->
@@ -139,6 +167,41 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>${plugin.javadoc}</version>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <!-- GPG Plugin -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>${plugin.gpg}</version>
+                    <executions>
+                        <execution>
+                            <id>sign-artifacts</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>sign</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                
+                <!-- Publish Plugin -->
+                <plugin>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>${plugin.publish}</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <publishingServerId>maven-sonatype-central</publishingServerId>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

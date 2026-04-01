@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>cn.itcraft</groupId>
         <artifactId>dyenums-parent</artifactId>
-        <version>1.0.0</version><!-- managed by updgitver -->
+        <version>1.0.0</version>        <!-- managed by updgitver -->
     </parent>
 
     <artifactId>dyenums-spring</artifactId>
@@ -19,6 +18,7 @@
         Dynamic Enum Library - Spring Integration Module
         a dynamic enum library for Java 8+ that provides runtime-extensible enums. Unlike traditional Java enums that are fixed at compile time, dyenums allows you to register, modify, and load enum values at runtime.
     </description>
+    <url>https://itcraft.cn/dyenums/</url>
 
     <scm>
         <connection>scm:git:git://github.com/itcraft-cn/dyenums.git</connection>
@@ -73,17 +73,19 @@
 
     <build>
         <plugins>
+            <!-- Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${plugin.compiler}</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${plugin.surefire}</version>
-            </plugin>
-            <!-- source -->
+
+            <!-- Source Plugin for generating source JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -97,7 +99,8 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- javadoc -->
+
+            <!-- Javadoc Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -111,7 +114,8 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- gpg -->
+
+            <!-- GPG Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
@@ -126,7 +130,8 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- publish -->
+
+            <!-- Publish Plugin -->
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>

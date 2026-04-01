@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+    xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>cn.itcraft</groupId>
         <artifactId>dyenums-parent</artifactId>
-        <version>1.0.0</version><!-- managed by updgitver -->
+        <version>1.0.0</version>        <!-- managed by updgitver -->
     </parent>
 
     <artifactId>dyenums-test</artifactId>
@@ -19,6 +18,7 @@
         Dynamic Enum Library - Test Module
         a dynamic enum library for Java 8+ that provides runtime-extensible enums. Unlike traditional Java enums that are fixed at compile time, dyenums allows you to register, modify, and load enum values at runtime.
     </description>
+    <url>https://itcraft.cn/dyenums/</url>
 
     <dependencies>
         <!-- Core Module -->
@@ -101,11 +101,19 @@
 
     <build>
         <plugins>
+            <!-- Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${plugin.compiler}</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
             </plugin>
+
+            <!-- Source Plugin for generating source JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
