@@ -39,7 +39,9 @@ public class EnumPerformanceMonitor {
     }
 
     /**
-     * Record an operation on an enum class
+     * Record an operation on an enum class.
+     *
+     * @param enumClass the enum class
      */
     public static void recordOperation(Class<?> enumClass) {
         AtomicLong counter = PER_CLASS_OPERATIONS.computeIfAbsent(enumClass, k -> new AtomicLong(0));
@@ -47,7 +49,10 @@ public class EnumPerformanceMonitor {
     }
 
     /**
-     * Record registry operation timing
+     * Record registry operation timing.
+     *
+     * @param startTime the start time in nanoseconds
+     * @param enumClass the enum class
      */
     public static void recordRegister(long startTime, Class<?> enumClass) {
         long duration = System.nanoTime() - startTime;
@@ -57,7 +62,10 @@ public class EnumPerformanceMonitor {
     }
 
     /**
-     * Record valueOf operation timing
+     * Record valueOf operation timing.
+     *
+     * @param startTime the start time in nanoseconds
+     * @param enumClass the enum class
      */
     public static void recordValueOf(long startTime, Class<?> enumClass) {
         long duration = System.nanoTime() - startTime;
@@ -67,7 +75,10 @@ public class EnumPerformanceMonitor {
     }
 
     /**
-     * Record values() operation timing
+     * Record values() operation timing.
+     *
+     * @param startTime the start time in nanoseconds
+     * @param enumClass the enum class
      */
     public static void recordValues(long startTime, Class<?> enumClass) {
         long duration = System.nanoTime() - startTime;
@@ -77,7 +88,10 @@ public class EnumPerformanceMonitor {
     }
 
     /**
-     * Record addEnum operation timing
+     * Record addEnum operation timing.
+     *
+     * @param startTime the start time in nanoseconds
+     * @param enumClass the enum class
      */
     public static void recordAddEnum(long startTime, Class<?> enumClass) {
         long duration = System.nanoTime() - startTime;
@@ -87,7 +101,10 @@ public class EnumPerformanceMonitor {
     }
 
     /**
-     * Record remove operation timing
+     * Record remove operation timing.
+     *
+     * @param startTime the start time in nanoseconds
+     * @param enumClass the enum class
      */
     public static void recordRemove(long startTime, Class<?> enumClass) {
         long duration = System.nanoTime() - startTime;
@@ -97,7 +114,9 @@ public class EnumPerformanceMonitor {
     }
 
     /**
-     * Get average time in microseconds for register operations
+     * Get average time in microseconds for register operations.
+     *
+     * @return average register time in microseconds
      */
     public static double getAverageRegisterTimeMicros() {
         long totalOps = REGISTER_COUNT.get();
@@ -105,7 +124,9 @@ public class EnumPerformanceMonitor {
     }
 
     /**
-     * Get average time in microseconds for valueOf operations
+     * Get average time in microseconds for valueOf operations.
+     *
+     * @return average valueOf time in microseconds
      */
     public static double getAverageValueOfTimeMicros() {
         long totalOps = VALUE_OF_COUNT.get();
@@ -113,7 +134,9 @@ public class EnumPerformanceMonitor {
     }
 
     /**
-     * Get average time in microseconds for values() operations
+     * Get average time in microseconds for values() operations.
+     *
+     * @return average values time in microseconds
      */
     public static double getAverageValuesTimeMicros() {
         long totalOps = VALUES_COUNT.get();
@@ -121,7 +144,9 @@ public class EnumPerformanceMonitor {
     }
 
     /**
-     * Generate detailed statistics report
+     * Generate detailed statistics report.
+     *
+     * @return formatted performance report string
      */
     public static String generateReport() {
         StringBuilder buf = new StringBuilder();

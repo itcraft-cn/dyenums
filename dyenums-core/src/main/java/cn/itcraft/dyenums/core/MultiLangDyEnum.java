@@ -26,7 +26,7 @@ public abstract class MultiLangDyEnum extends BaseDyEnum {
      * @param code     the unique code for this enum value
      * @param name     the display name for this enum value
      * @param order    the order/sort index for this enum value
-     * @param messages map of locale code to message (e.g., "zh" -> "系统错误")
+     * @param messages map of locale code to message {@code (e.g., "zh" -> "系统错误")}
      */
     protected MultiLangDyEnum(String code, String name, int order, Map<String, String> messages) {
         super(code, name, null, order);

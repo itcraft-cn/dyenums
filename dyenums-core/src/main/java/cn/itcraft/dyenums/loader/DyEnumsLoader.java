@@ -18,7 +18,7 @@ public interface DyEnumsLoader<T extends DyEnum> {
      * Loads enum definitions from the configured source.
      *
      * @param enumClass the enum class to load
-     * @param factory   function to create enum instances (code, valueString -> enum)
+     * @param factory   function to create enum instances {@code (code, valueString -> enum)}
      * @return the number of enums loaded
      * @throws Exception if loading fails
      */

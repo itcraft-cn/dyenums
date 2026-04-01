@@ -171,6 +171,8 @@ public abstract class BaseDyEnum implements DyEnum, Serializable {
      * This prevents creation of invalid enum instances through deserialization attacks.
      *
      * @param in the object input stream
+     * @throws java.io.IOException if an I/O error occurs
+     * @throws ClassNotFoundException if the class of a serialized object could not be found
      * @throws InvalidObjectException if the deserialized object is invalid
      */
     private void readObject(ObjectInputStream in)
