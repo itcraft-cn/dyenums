@@ -192,7 +192,7 @@ public class EnumService {
      *
      * @param enumClass the enum class type
      * @param <T>       the enum type
-     * @return map of code -> enum value
+     * @return map of {@code code -> enum value}
      * @throws NullPointerException if enumClass is null
      */
     public <T extends DyEnum> Map<String, T> asMap(Class<T> enumClass) {
@@ -201,11 +201,11 @@ public class EnumService {
     }
 
     /**
-     * Converts enum values to a map of code -> name.
+     * Converts enum values to a map of {@code code -> name}.
      *
      * @param enumClass the enum class type
      * @param <T>       the enum type
-     * @return map of code -> name
+     * @return map of {@code code -> name}
      * @throws NullPointerException if enumClass is null
      */
     public <T extends DyEnum> Map<String, String> asCodeNameMap(Class<T> enumClass) {
